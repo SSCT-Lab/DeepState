@@ -112,9 +112,9 @@ if __name__ == '__main__':
         dense_model = dense_classifier.reload_dense(args.dl_model)
 
         to_select_path = "./gen_data/fashion_retrain/fashion_toselect.npz"
-        ori_val_path = "./gen_data/fashion_retrain/fashion_ori_test.csv"
-        aug_val_path = "./gen_data/fashion_retrain/fashion_aug_test.csv"
-        mix_val_path = "./gen_data/fashion_retrain/fashion_mix_test.csv"
+        ori_val_path = "./gen_data/fashion_retrain/fashion_ori_test.npz"
+        aug_val_path = "./gen_data/fashion_retrain/fashion_aug_test.npz"
+        mix_val_path = "./gen_data/fashion_retrain/fashion_mix_test.npz"
         retrain_save_path = "./RNNModels/fashion_demo/models/lstm_selected_"
         wrapper_path = "./RNNModels/fashion_demo/output/lstm/abst_model/wrapper_lstm_fashion_3_10.pkl"
         total_num = 6000
@@ -130,9 +130,9 @@ if __name__ == '__main__':
         dense_model = dense_classifier.reload_dense(args.dl_model)
 
         to_select_path = "./gen_data/fashion_retrain/fashion_toselect.npz"
-        ori_val_path = "./gen_data/fashion_retrain/fashion_ori_test.csv"
-        aug_val_path = "./gen_data/fashion_retrain/fashion_aug_test.csv"
-        mix_val_path = "./gen_data/fashion_retrain/fashion_mix_test.csv"
+        ori_val_path = "./gen_data/fashion_retrain/fashion_ori_test.npz"
+        aug_val_path = "./gen_data/fashion_retrain/fashion_aug_test.npz"
+        mix_val_path = "./gen_data/fashion_retrain/fashion_mix_test.npz"
         retrain_save_path = "./RNNModels/fashion_demo/models/gru_selected_"
         wrapper_path = "./RNNModels/fashion_demo/output/gru/abst_model/wrapper_gru_fashion_3_10.pkl"
         total_num = 6000
@@ -143,7 +143,7 @@ if __name__ == '__main__':
 
     ori_acc_imp, aug_acc_imp, mix_acc_imp = {}, {}, {}
 
-    pre_li = [1, 5, 10, 15, 20]
+    pre_li = [1, 5, 10, 15, 20, 25, 30]
     weight_state, unique_index_arr_id, stellar_bscov, stellar_btcov, rnntest_sc, nc_cov, nc_cam, \
     rnntest_sc_cam, trend_set, right = get_selection_information(to_select_path, model, lstm_classifier,
                                                                  dense_model, wrapper_path, w2v_path, time_steps)
@@ -177,16 +177,18 @@ if __name__ == '__main__':
             X_selected_array, Y_selected_array = get_selected_data(to_select_path, np.array(eval(method_item)), w2v_path)
             retrained_model_path = retrain_save_path + str(pre) + "/" + str(method_item) + "_" + \
                                    str(args.dataset) + "_" + str(args.model_type) + ".h5"
-            if os.path.isfile(retrained_model_path):
-                print("Have already saved the retrained model.")
-                break
-            os.makedirs(retrain_save_path + str(pre), exist_ok=True)
-            lstm_classifier.retrain(X_selected_array, Y_selected_array, x_ori_val, y_ori_val, retrained_model_path)
+            if not os.path.isfile(retrained_model_path):  # 没有被保存过，需要训练
+                os.makedirs(retrain_save_path + str(pre), exist_ok=True)
+                lstm_classifier.retrain(X_selected_array, Y_selected_array, x_aug_val, y_aug_val, retrained_model_path)
 
             K.clear_session()
             ori_acc_imp[method_item].append(lstm_classifier.evaluate_retrain(retrained_model_path, args.dl_model, x_ori_val, y_ori_val))
             aug_acc_imp[method_item].append(lstm_classifier.evaluate_retrain(retrained_model_path, args.dl_model, x_aug_val, y_aug_val))
             mix_acc_imp[method_item].append(lstm_classifier.evaluate_retrain(retrained_model_path, args.dl_model, x_mix_val, y_mix_val))
+
+            print("{}_{}: ".format("ori_acc_imp", method_item), ori_acc_imp[method_item])
+            print("{}_{}: ".format("aug_acc_imp", method_item), aug_acc_imp[method_item])
+            print("{}_{}: ".format("mix_acc_imp", method_item), mix_acc_imp[method_item])
 
     result_dict = {}
     result_dict['select rate'] = pre_li
@@ -197,5 +199,4 @@ if __name__ == '__main__':
 
     print(result_dict)
     df = pd.DataFrame(result_dict)
-    os.makedirs("./exp_results/rq3", exist_ok=True)
     df.to_csv("./exp_results/rq3/rq3_{}_{}.csv".format(args.dataset, args.model_type))
