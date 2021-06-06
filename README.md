@@ -57,7 +57,7 @@ python3 ./abstraction_runner.py -test_obj "mnist_lstm"
 python3 rq1.py -dl_model "./RNNModels/mnist_demo/models/mnist_lstm.h5" -model_type "lstm" -dataset "mnist"
 ```
 
-The results will be saved in `.\exp_results\rq1`
+The results will be saved in `./exp_results/rq1`
 
 ## RQ2
 
@@ -65,7 +65,7 @@ The results will be saved in `.\exp_results\rq1`
 python3 rq2.py -dl_model "./RNNModels/mnist_demo/models/mnist_lstm.h5" -model_type "lstm" -dataset "mnist"
 ```
 
-The results will be saved in `.\exp_results\rq2`
+The results will be saved in `./exp_results/rq2`
 
 ## RQ3
 
@@ -73,4 +73,4 @@ The results will be saved in `.\exp_results\rq2`
 python3 rq3.py -dl_model "./RNNModels/mnist_demo/models/mnist_lstm.h5" -model_type "lstm" -dataset "mnist"
 ```
 
-The results will be saved in `.\exp_results\rq3`
+The results will be saved in `./exp_results/rq3`
