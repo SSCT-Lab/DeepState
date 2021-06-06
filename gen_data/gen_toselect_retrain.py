@@ -34,6 +34,10 @@ def gen_mnist():
         y_to_select_mnist.append(ori_y_test_data[i])
     x_save_data = np.array(x_to_select_mnist)
     y_save_data = np.array(y_to_select_mnist)
+    state = np.random.get_state()
+    np.random.shuffle(x_save_data)
+    np.random.set_state(state)
+    np.random.shuffle(y_save_data)
 
     for j in retrain_test_id:
         dd1 = x_test_data[j].reshape(1, 28, 28)
@@ -92,6 +96,10 @@ def gen_fashion():
         y_to_select_mnist.append(ori_y_test_data[i])
     x_save_data = np.array(x_to_select_mnist)
     y_save_data = np.array(y_to_select_mnist)
+    state = np.random.get_state()
+    np.random.shuffle(x_save_data)
+    np.random.set_state(state)
+    np.random.shuffle(y_save_data)
 
     for j in retrain_test_id:
         dd1 = x_test_data[j].reshape(1, 28, 28)
@@ -172,6 +180,7 @@ def gen_snips():
         mix_test.loc[idx] = tmp
 
     os.makedirs("./gen_data/snips_retrain", exist_ok=True)
+    to_select.sample(frac=1)  # shuffle
     to_select.to_csv("./gen_data/snips_retrain/snips_toselect.csv")
     ori_test.to_csv("./gen_data/snips_retrain/snips_ori_test.csv")
     aug_test.to_csv("./gen_data/snips_retrain/snips_aug_test.csv")

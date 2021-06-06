@@ -37,6 +37,10 @@ def gen_mnist():
 
         x_save_data = np.array(x_to_select_mnist)
         y_save_data = np.array(y_to_select_mnist)
+        state = np.random.get_state()
+        np.random.shuffle(x_save_data)
+        np.random.set_state(state)
+        np.random.shuffle(y_save_data)
 
         np.savez(("./gen_data/mnist_toselect/mnist_toselect" + "_{}").format(times), X=x_save_data, Y=y_save_data)
 
@@ -67,6 +71,7 @@ def gen_snips():
             tmp = {'text': text_i, 'intent': intent_i}
             to_select.loc[idx] = tmp
 
+        to_select.sample(frac=1)  # shuffle
         to_select.to_csv(("./gen_data/snips_toselect/snips_toselect" + "_{}" + ".csv").format(times))
 
 
@@ -101,6 +106,10 @@ def gen_fashion():
 
         x_save_data = np.array(x_to_select_mnist)
         y_save_data = np.array(y_to_select_mnist)
+        state = np.random.get_state()
+        np.random.shuffle(x_save_data)
+        np.random.set_state(state)
+        np.random.shuffle(y_save_data)
 
         np.savez(("./gen_data/fashion_toselect/fashion_toselect" + "_{}").format(times), X=x_save_data, Y=y_save_data)
 
