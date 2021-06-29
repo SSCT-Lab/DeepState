@@ -65,9 +65,9 @@ def process_data(data_path, save_path):
 
     # 划分数据集
     # X_train, X_test, Y_train, Y_test = train_test_split(X_pad, Y, test_size=0.2, shuffle=False)
-    X_train = X_pad[:9990]  # 11587
+    X_train = X_pad[500:9990]  # 11587
     X_test = X_pad[9990:]
-    Y_train = Y[:9990]
+    Y_train = Y[500:9990]
     Y_test = Y[9990:]
 
     # 让 Keras 的 Embedding 层使用训练好的Word2Vec权重
@@ -102,8 +102,8 @@ class SnipsGRUClassifier:
         self.X_test = None
         self.Y_test = None
         self.n_units = 128  # hidden LSTM units
-        self.n_epochs = 20
-        self.batch_size = 32  # Size of each batch
+        self.n_epochs = 10
+        self.batch_size = 64  # Size of each batch
         self.n_classes = 7
 
     def get_information(self):
@@ -120,7 +120,7 @@ class SnipsGRUClassifier:
             weights=[self.embedding_matrix],
             mask_zero=True,
             trainable=False, name="embedding")(input)
-        gru = GRU(self.n_units, return_sequences=True, name='gru')(embedding)
+        gru = GRU(self.n_units, return_sequences=True, dropout=0.1, name='gru')(embedding)
         last_timestep = Lambda(lambda x: x[:, -1, :])(gru)
         dense1 = Dense(32, activation="relu", name='dense1')(last_timestep)
         dropout = Dropout(0.5, name='drop')(dense1)
@@ -132,7 +132,7 @@ class SnipsGRUClassifier:
     def train_model(self, save_path):
         self.create_model()
         checkpoint = ModelCheckpoint(filepath=os.path.join(save_path, "snips_gru.h5"),
-                                     monitor='val_loss', verbose=1, save_best_only=True, mode='min')
+                                     monitor='val_acc', verbose=1, save_best_only=True, mode='auto')
         self.model.fit(self.X_train, self.Y_train, epochs=self.n_epochs, batch_size=self.batch_size,
                        validation_data=(self.X_test, self.Y_test), callbacks=[checkpoint])
         os.makedirs(save_path, exist_ok=True)
@@ -145,7 +145,7 @@ class SnipsGRUClassifier:
         Xa_train = np.concatenate([X_selected, self.X_train])
         Ya_train = np.concatenate([Y_selected, self.Y_train])
 
-        checkpoint = ModelCheckpoint(filepath=save_path, monitor='val_loss', verbose=1, save_best_only=True, mode='min')
+        checkpoint = ModelCheckpoint(filepath=save_path, monitor='val_acc', verbose=1, save_best_only=True, mode='auto')
         self.model.fit(Xa_train, Ya_train, validation_data=(X_val, Y_val), epochs=self.n_epochs,
                        batch_size=self.batch_size, callbacks=[checkpoint])
 
@@ -156,7 +156,8 @@ class SnipsGRUClassifier:
         ori_model = load_model(ori_model_path)
         retrain_acc = retrain_model.evaluate(x_val, y_val)[1]
         ori_acc = ori_model.evaluate(x_val, y_val)[1]
-        return retrain_acc - ori_acc
+        print("retrain acc: ", retrain_acc, "ori acc:", ori_acc)
+        return retrain_acc, retrain_acc - ori_acc
 
     def load_hidden_state_model(self, model_path):
         """
@@ -174,7 +175,7 @@ class SnipsGRUClassifier:
             weights=[self.embedding_matrix],
             mask_zero=True,
             trainable=False, name="embedding")(input)
-        gru = GRU(self.n_units, return_sequences=True, name='gru')(embedding)
+        gru = GRU(self.n_units, return_sequences=True, dropout=0.1, name='gru')(embedding)
         last_timestep = Lambda(lambda x: x[:, -1, :])(gru)
         dense1 = Dense(32, activation="relu", name='dense1')(last_timestep)
         dropout = Dropout(0.5, name='drop')(dense1)
@@ -211,14 +212,14 @@ class SnipsGRUClassifier:
 
 if __name__ == '__main__':
     # step 1. preprocess data
-    data_path = "./data/new_intent.csv"
-    save_path = "./save"
-    process_data(data_path, save_path)
+    # data_path = "./data/new_intent.csv"
+    # save_path = "./save"
+    # process_data(data_path, save_path)
 
     # step 2. create and train the model
     classifier = SnipsGRUClassifier()
     classifier.embedding_path = "./save/embedding_matrix.npy"
     classifier.data_path = "./save/standard_data.npz"
     classifier.get_information()
-    classifier.train_model("./RNNModels/snips_demo/models")
+    classifier.train_model("./models")
 

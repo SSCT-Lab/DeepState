@@ -19,7 +19,7 @@ class MnistBLSTMClassifier:
         self.n_inputs = 28  # rows of 28 pixels (an mnist img is 28x28)
         self.n_classes = 10  # mnist classes/labels (0-9)
         self.batch_size = 128  # Size of each batch
-        self.n_epochs = 20
+        self.n_epochs = 30
 
     def input_preprocess(self, data):
         data = data.reshape(data.shape[0], self.n_inputs, self.n_inputs)
@@ -32,23 +32,22 @@ class MnistBLSTMClassifier:
         lstm = Bidirectional(
             LSTM(self.n_units, input_shape=(self.time_steps, self.n_inputs), return_sequences=True, name='lstm'))(input)
         last_timestep = Lambda(lambda x: x[:, -1, :])(lstm)
-        dense1 = Dense(32, activation="relu", name='dense1')(last_timestep)
-        dropout = Dropout(0.5, name='drop')(dense1)
+        dense1 = Dense(64, activation="relu", name='dense1')(last_timestep)
+        dropout = Dropout(0.4, name='drop')(dense1)
         dense2 = Dense(self.n_classes, activation="softmax", name='dense2')(dropout)
-
         self.model = Model(inputs=input, outputs=dense2)
-        self.model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+        self.model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
         # self.model.summary()
 
     def train(self, save_path):
         self.create_model()
         (x_train, y_train), (x_test, y_test) = mnist.load_data()
 
-        x_train = self.input_preprocess(x_train)
+        x_train = self.input_preprocess(x_train[:-6000])
         x_test = self.input_preprocess(x_test)
 
         y_test = keras.utils.to_categorical(y_test, num_classes=10)
-        y_train = keras.utils.to_categorical(y_train, num_classes=10)
+        y_train = keras.utils.to_categorical(y_train[:-6000], num_classes=10)
 
         checkpoint = ModelCheckpoint(filepath=os.path.join(save_path, "mnist_blstm.h5"), monitor='val_acc', mode='auto',
                                      save_best_only='True')
@@ -61,8 +60,8 @@ class MnistBLSTMClassifier:
     def retrain(self, X_selected, Y_selected, X_val, Y_val, save_path):
         self.create_model()
         (x_train, y_train), (x_test, y_test) = mnist.load_data()
-        Xa_train = np.concatenate([X_selected, x_train])
-        Ya_train = np.concatenate([Y_selected, y_train])
+        Xa_train = np.concatenate([X_selected, x_train[:-6000]])
+        Ya_train = np.concatenate([Y_selected, y_train[:-6000]])
 
         Xa_train = self.input_preprocess(Xa_train)
         X_val = self.input_preprocess(X_val)
@@ -76,6 +75,19 @@ class MnistBLSTMClassifier:
 
         self.model.save(save_path)
 
+    def retrain1(self, ori_model_path, X_selected, Y_selected, X_val, Y_val, save_path):
+        self.create_model()
+        self.model.load_weights(ori_model_path, by_name=True)
+        Xa_train = self.input_preprocess(X_selected)
+        X_val = self.input_preprocess(X_val)
+        Ya_train = keras.utils.to_categorical(Y_selected, num_classes=10)
+        Y_val = keras.utils.to_categorical(Y_val, num_classes=10)
+        checkpoint = ModelCheckpoint(filepath=save_path, monitor='val_acc', mode='auto', save_best_only='True')
+        self.model.fit(Xa_train, Ya_train, validation_data=(X_val, Y_val),
+                       batch_size=self.batch_size, epochs=30, shuffle=False, callbacks=[checkpoint])
+
+        self.model.save(save_path)
+
     def evaluate_retrain(self, retrain_model_path, ori_model_path, x_val, y_val):
         x_val = self.input_preprocess(x_val)
         y_val = keras.utils.to_categorical(y_val, num_classes=10)
@@ -84,7 +96,8 @@ class MnistBLSTMClassifier:
         ori_model = load_model(ori_model_path)
         retrain_acc = retrain_model.evaluate(x_val, y_val)[1]
         ori_acc = ori_model.evaluate(x_val, y_val)[1]
-        return retrain_acc - ori_acc
+        print("retrain acc: ", retrain_acc, "ori acc:", ori_acc)
+        return retrain_acc, retrain_acc - ori_acc
 
     def load_hidden_state_model(self, model_path):
         """
@@ -94,8 +107,8 @@ class MnistBLSTMClassifier:
         lstm = Bidirectional(
             LSTM(self.n_units, input_shape=(self.time_steps, self.n_inputs), return_sequences=True, name='lstm'))(input)
         last_timestep = Lambda(lambda x: x[:, -1, :])(lstm)
-        dense1 = Dense(32, activation="relu", name='dense1')(last_timestep)
-        dropout = Dropout(0.5, name='drop')(dense1)
+        dense1 = Dense(64, activation="relu", name='dense1')(last_timestep)
+        dropout = Dropout(0.4, name='drop')(dense1)
         dense2 = Dense(self.n_classes, activation="softmax", name='dense2')(dropout)
 
         model = Model(inputs=input, outputs=[dense2, lstm])
@@ -105,8 +118,8 @@ class MnistBLSTMClassifier:
 
     def reload_dense(self, model_path):
         input = Input(shape=((self.n_units * 2),))
-        dense1 = Dense(32, activation="relu", name='dense1')(input)
-        dropout = Dropout(0.5, name='drop')(dense1)
+        dense1 = Dense(64, activation="relu", name='dense1')(input)
+        dropout = Dropout(0.4, name='drop')(dense1)
         dense2 = Dense(self.n_classes, activation="softmax", name='dense2')(dropout)
         model = Model(inputs=input, outputs=dense2)
         model.load_weights(model_path, by_name=True)
@@ -131,7 +144,7 @@ class MnistBLSTMClassifier:
 if __name__ == "__main__":
     (x_train, y_train), (x_test, y_test) = mnist.load_data()
 
-    save_path = "./RNNModels/mnist_demo/models"
+    save_path = "./models"
 
     lstm_classifier = MnistBLSTMClassifier()
     x_test = lstm_classifier.input_preprocess(x_test)

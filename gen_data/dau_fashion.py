@@ -81,7 +81,7 @@ class daugor(object):
             ori_label_list = []
 
             if prefix == "train":
-                data = zip(self.x_train, self.y_train)  # 3k个*2
+                data = zip(self.x_train[-12000:], self.y_train[-12000:])
             else:
                 data = zip(self.x_test, self.y_test)
             for x, y in tqdm(data):

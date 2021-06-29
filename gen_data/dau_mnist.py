@@ -70,7 +70,7 @@ class daugor(object):
     # 扩增数据
     def dau_datasets(self, num=10):
         self.init_dir()
-        # self.run("train", num=num)
+        self.run("train", num=num)
         self.run("test", num=num)
 
     def run(self, prefix, num=10):
@@ -81,7 +81,7 @@ class daugor(object):
             ori_label_list = []
 
             if prefix == "train":
-                data = zip(self.x_train, self.y_train)
+                data = zip(self.x_train[-12000:], self.y_train[-12000:])
             else:
                 data = zip(self.x_test, self.y_test)
             for x, y in tqdm(data):
@@ -94,16 +94,16 @@ class daugor(object):
             ys = np.array(label_list)
             xss = np.array(ori_img_list)
             yss = np.array(ori_label_list)
-            np.save((self.x_path + "_{}").format(prefix, i), xs)
-            np.save((self.y_path + "_{}").format(prefix, i), ys)
+            np.save((self.x_path + "_{}").format(prefix, "aug"), xs)
+            np.save((self.y_path + "_{}").format(prefix, "aug"), ys)
 
-            np.save((self.x_path + "_{}").format("ori_test", i), xss)
-            np.save((self.y_path + "_{}").format("ori_test", i), yss)
+            np.save((self.x_path + "_{}").format(prefix, "ori"), xss)
+            np.save((self.y_path + "_{}").format(prefix, "ori"), yss)
 
 
 if __name__ == '__main__':
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-    os.makedirs("./gen_data/dau", exist_ok=True)
+    os.makedirs("./dau", exist_ok=True)
+
     # 初始化参数
     params = {
         "data_name": None,
@@ -118,5 +118,5 @@ if __name__ == '__main__':
     params["width"] = 28
     params["height"] = 28
     params["channel"] = 1
-    params["base_dir"] = "./gen_data/dau/{}_harder".format("mnist")
+    params["base_dir"] = "./dau/{}_harder".format("mnist")
     daugor(params).dau_datasets(num=1)

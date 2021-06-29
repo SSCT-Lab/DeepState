@@ -2,17 +2,16 @@ import keras
 import os
 from keras.datasets import fashion_mnist
 from keras.models import Sequential
-from keras.layers import Input, Lambda, LSTM, Dense, Dropout, Bidirectional, GRU
+from keras.layers import Input, Lambda, Dense, Dropout, GRU
 from keras.models import load_model
 from keras.models import Model
 import numpy as np
 import os
 from keras.callbacks import ModelCheckpoint
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-# loss: 0.1949 - accuracy: 0.9281 - val_loss: 0.3311 - val_accuracy: 0.8855
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 
-class FashionLSTMClassifier:
+class FashionGRUClassifier:
     def __init__(self):
         # Classifier
         self.time_steps = 28  # timesteps to unroll
@@ -20,7 +19,7 @@ class FashionLSTMClassifier:
         self.n_inputs = 28  # rows of 28 pixels (a fashion img is 28x28)
         self.n_classes = 10  # mnist classes/labels (0-9)
         self.batch_size = 128  # Size of each batch
-        self.n_epochs = 50
+        self.n_epochs = 30
 
     def create_model(self):
         # self.model = Sequential()
@@ -56,7 +55,7 @@ class FashionLSTMClassifier:
 
     def reload_dense(self, model_path):
         input = Input(shape=(self.n_units, ))
-        dense1 = Dense(256, activation="relu", name='dense1')(input)
+        dense1 = Dense(64, activation="relu", name='dense1')(input)
         dropout = Dropout(0.4, name='drop')(dense1)
         dense2 = Dense(self.n_classes, activation="softmax", name='dense2')(dropout)
         model = Model(inputs=input, outputs=dense2)
@@ -68,25 +67,25 @@ class FashionLSTMClassifier:
         self.create_model()
         (x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
 
-        x_train = self.input_preprocess(x_train)
+        x_train = self.input_preprocess(x_train[:-6000])
         x_test = self.input_preprocess(x_test)
 
         y_test = keras.utils.to_categorical(y_test, num_classes=10)
-        y_train = keras.utils.to_categorical(y_train, num_classes=10)
+        y_train = keras.utils.to_categorical(y_train[:-6000], num_classes=10)
 
-        checkpoint = ModelCheckpoint(filepath=os.path.join(save_path, "fashion_lstm1.h5"),
+        checkpoint = ModelCheckpoint(filepath=os.path.join(save_path, "fashion_gru.h5"),
                                      monitor='val_acc', mode='auto', save_best_only='True')
         self.model.fit(x_train, y_train, validation_data=(x_test, y_test),
                        batch_size=self.batch_size, epochs=self.n_epochs, shuffle=False, callbacks=[checkpoint])
 
         os.makedirs(save_path, exist_ok=True)
-        self.model.save(os.path.join(save_path, "fashion_lstm1.h5"))
+        self.model.save(os.path.join(save_path, "fashion_gru.h5"))
 
     def retrain(self, X_selected, Y_selected, X_val, Y_val, save_path):
         self.create_model()
         (x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
-        Xa_train = np.concatenate([X_selected, x_train])
-        Ya_train = np.concatenate([Y_selected, y_train])
+        Xa_train = np.concatenate([X_selected, x_train[:-6000]])
+        Ya_train = np.concatenate([Y_selected, y_train[:-6000]])
 
         Xa_train = self.input_preprocess(Xa_train)
         X_val = self.input_preprocess(X_val)
@@ -120,7 +119,8 @@ class FashionLSTMClassifier:
         ori_model = load_model(ori_model_path)
         retrain_acc = retrain_model.evaluate(x_val, y_val)[1]
         ori_acc = ori_model.evaluate(x_val, y_val)[1]
-        return retrain_acc - ori_acc
+        print("retrain acc: ", retrain_acc, "ori acc:", ori_acc)
+        return retrain_acc, retrain_acc - ori_acc
 
     def input_preprocess(self, data):
         data = data.reshape(data.shape[0], self.time_steps, self.n_inputs)
@@ -147,15 +147,9 @@ class FashionLSTMClassifier:
 if __name__ == "__main__":
     (x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
     save_path = "./models"
-    lstm_classifier = FashionLSTMClassifier()
+    lstm_classifier = FashionGRUClassifier()
 
     # train an rnn model
     lstm_classifier.create_model()
     lstm_classifier.train(save_path)
 
-    # m = load_model("./models/fashion_lstm.h5")
-    # (x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
-    # lstm_classifier = FashionLSTMClassifier()
-    # x_test = lstm_classifier.input_preprocess(x_test)
-    # y_test = keras.utils.to_categorical(y_test, num_classes=10)
-    # print(m.evaluate(x_test, y_test)[1])

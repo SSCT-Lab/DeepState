@@ -8,6 +8,7 @@ import random
 import nlpaug.flow as nafc
 from nlpaug.util import Action
 import csv
+import os
 
 
 def replace_synonym(text):
@@ -60,10 +61,10 @@ def aug_sentence(sentence, choose_aug):
 
 
 if __name__ == '__main__':
-    model_dir = "./nlp_model/"
+    model_dir = "../../code/nlp_model/"
     os.makedirs("./gen_data/dau", exist_ok=True)
     data = pd.read_csv("./dau/snips_harder/new_intent.csv")
-    to_be_aug_data = data[9990:]
+    to_be_aug_data = data[:500]
     # selected_data = to_be_aug_data.sample(n=1000)
 
     selected_data = to_be_aug_data.reset_index(drop=True)
@@ -100,4 +101,4 @@ if __name__ == '__main__':
         aug_data.loc[idx] = aug
         idx = idx + 1
 
-    aug_data.to_csv("./gen_data/dau/snips_harder/to_select_intent.csv")
+    aug_data.to_csv("./gen_data/dau/snips_harder/snips_toselect.csv")
