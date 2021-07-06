@@ -187,6 +187,15 @@ def gen_snips():
 
 
 if __name__ == '__main__':
-    # gen_fashion()
-    gen_mnist()
-    # gen_snips()
+    parse = argparse.ArgumentParser("Generate the to-be-selected dataset for retraining and evaluation.")
+    parse.add_argument('-dataset', required=True, choices=['mnist', 'snips', 'fashion'])
+    args = parse.parse_args()
+
+    if args.dataset == "mnist":
+        gen_mnist()
+
+    if args.dataset == "snips":
+        gen_snips()
+
+    if args.dataset == "fashion":
+        gen_fashion()
