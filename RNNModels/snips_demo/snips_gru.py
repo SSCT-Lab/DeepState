@@ -101,8 +101,8 @@ class SnipsGRUClassifier:
         self.Y_train = None
         self.X_test = None
         self.Y_test = None
-        self.n_units = 128  # hidden LSTM units
-        self.n_epochs = 10
+        self.n_units = 64  # hidden LSTM units
+        self.n_epochs = 20
         self.batch_size = 64  # Size of each batch
         self.n_classes = 7
 
@@ -120,10 +120,10 @@ class SnipsGRUClassifier:
             weights=[self.embedding_matrix],
             mask_zero=True,
             trainable=False, name="embedding")(input)
-        gru = GRU(self.n_units, return_sequences=True, dropout=0.1, name='gru')(embedding)
+        gru = GRU(self.n_units, return_sequences=True, dropout=0.5, name='gru')(embedding)
         last_timestep = Lambda(lambda x: x[:, -1, :])(gru)
-        dense1 = Dense(32, activation="relu", name='dense1')(last_timestep)
-        dropout = Dropout(0.5, name='drop')(dense1)
+        dense1 = Dense(64, activation="relu", name='dense1')(last_timestep)
+        dropout = Dropout(0.3, name='drop')(dense1)
         dense2 = Dense(self.n_classes, activation="softmax", name='dense2')(dropout)
         self.model = Model(inputs=input, outputs=dense2)
         self.model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
@@ -175,10 +175,10 @@ class SnipsGRUClassifier:
             weights=[self.embedding_matrix],
             mask_zero=True,
             trainable=False, name="embedding")(input)
-        gru = GRU(self.n_units, return_sequences=True, dropout=0.1, name='gru')(embedding)
+        gru = GRU(self.n_units, return_sequences=True, dropout=0.5, name='gru')(embedding)
         last_timestep = Lambda(lambda x: x[:, -1, :])(gru)
-        dense1 = Dense(32, activation="relu", name='dense1')(last_timestep)
-        dropout = Dropout(0.5, name='drop')(dense1)
+        dense1 = Dense(64, activation="relu", name='dense1')(last_timestep)
+        dropout = Dropout(0.3, name='drop')(dense1)
         dense2 = Dense(self.n_classes, activation="softmax", name='dense2')(dropout)
 
         model = Model(inputs=input, outputs=[dense2, gru])
@@ -188,8 +188,8 @@ class SnipsGRUClassifier:
 
     def reload_dense(self, model_path):
         input = Input(shape=((self.n_units),))
-        dense1 = Dense(32, activation="relu", name='dense1')(input)
-        dropout = Dropout(0.5, name='drop')(dense1)
+        dense1 = Dense(64, activation="relu", name='dense1')(input)
+        dropout = Dropout(0.3, name='drop')(dense1)
         dense2 = Dense(self.n_classes, activation="softmax", name='dense2')(dropout)
         model = Model(inputs=input, outputs=dense2)
         model.load_weights(model_path, by_name=True)

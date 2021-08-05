@@ -101,7 +101,7 @@ class SnipsBLSTMClassifier:
         self.Y_train = None
         self.X_test = None
         self.Y_test = None
-        self.n_units = 128  # hidden LSTM units
+        self.n_units = 64  # hidden LSTM units
         self.n_epochs = 10
         self.batch_size = 32  # Size of each batch
         self.n_classes = 7
@@ -120,10 +120,10 @@ class SnipsBLSTMClassifier:
             weights=[self.embedding_matrix],
             mask_zero=True,
             trainable=False, name="embedding")(input)
-        lstm = Bidirectional(LSTM(self.n_units, return_sequences=True, name='lstm'))(embedding)
+        lstm = Bidirectional(LSTM(self.n_units, return_sequences=True, dropout=0.5, name='lstm'))(embedding)
         last_timestep = Lambda(lambda x: x[:, -1, :])(lstm)
-        dense1 = Dense(128, activation="relu", name='dense1')(last_timestep)
-        dropout = Dropout(0.2, name='drop')(dense1)
+        dense1 = Dense(32, activation="relu", name='dense1')(last_timestep)
+        dropout = Dropout(0.3, name='drop')(dense1)
         dense2 = Dense(self.n_classes, activation="softmax", name='dense2')(dropout)
         self.model = Model(inputs=input, outputs=dense2)
         self.model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
@@ -175,10 +175,10 @@ class SnipsBLSTMClassifier:
             weights=[self.embedding_matrix],
             mask_zero=True,
             trainable=False, name="embedding")(input)
-        lstm = Bidirectional(LSTM(self.n_units, return_sequences=True, name='lstm'))(embedding)
+        lstm = Bidirectional(LSTM(self.n_units, return_sequences=True, dropout=0.5, name='lstm'))(embedding)
         last_timestep = Lambda(lambda x: x[:, -1, :])(lstm)
-        dense1 = Dense(128, activation="relu", name='dense1')(last_timestep)
-        dropout = Dropout(0.2, name='drop')(dense1)
+        dense1 = Dense(32, activation="relu", name='dense1')(last_timestep)
+        dropout = Dropout(0.3, name='drop')(dense1)
         dense2 = Dense(self.n_classes, activation="softmax", name='dense2')(dropout)
         model = Model(inputs=input, outputs=[dense2, lstm])
         model.load_weights(model_path, by_name=True)
@@ -187,8 +187,8 @@ class SnipsBLSTMClassifier:
 
     def reload_dense(self, model_path):
         input = Input(shape=((self.n_units * 2),))
-        dense1 = Dense(128, activation="relu", name='dense1')(input)
-        dropout = Dropout(0.2, name='drop')(dense1)
+        dense1 = Dense(32, activation="relu", name='dense1')(input)
+        dropout = Dropout(0.3, name='drop')(dense1)
         dense2 = Dense(self.n_classes, activation="softmax", name='dense2')(dropout)
         model = Model(inputs=input, outputs=dense2)
         model.load_weights(model_path, by_name=True)
