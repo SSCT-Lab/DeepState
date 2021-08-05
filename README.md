@@ -43,6 +43,8 @@ For evaluation RQ3, we generate the dataset for selection and retraining and the
 python3 ./gen_data/gen_toselect_retrain.py -dataset "mnist"   # for RQ3
 ```
 
+If you feel that the steps to generate the augmented data are troublesome, or you just want to reproduce the results, you can download the data we generated [here](https://drive.google.com/drive/folders/1jjtwb44aX_yeeYktlyCpPUoDXeZ2mHYR?usp=sharing).
+
 ## Generating the abstract model used for calculating the DeepStellar-coverage 
 
 The coverage calculation of DeepStellar requires an abstract model to be generated in advance. This part of the code comes from [DeepStellar](https://github.com/xiaoningdu/deepstellar) 's open source code.
