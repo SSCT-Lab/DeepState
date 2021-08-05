@@ -9,7 +9,7 @@ import numpy as np
 from tqdm import tqdm
 
 
-# 扩增类
+# augmentation class
 class daugor(object):
     def __init__(self, params, ):
         self.params = params
@@ -25,7 +25,7 @@ class daugor(object):
         self.gen = None
         self.init_dir()
         self.init_gen()
-        # 初始化文件夹
+        # Initialize the folder
 
     def init_dir(self):
         if not os.path.exists(self.params["base_dir"]):
@@ -33,11 +33,11 @@ class daugor(object):
 
     def init_gen(self):
         params_map = {
-            "w_r": 0.3,  # 左右平移
-            "h_r": 0.3,  # 上下平移
-            "rotation_range": 25,  # 旋转角度
-            "zoom_range": 0.4,  # 随机缩放
-            "brightness_range": [0.5, 1.5]
+            "w_r": 0.3,  # Random shift left and right
+            "h_r": 0.3,  # Random shift up and down
+            "rotation_range": 25,  # Random rotation angle
+            "zoom_range": 0.4,  # Random zoom
+            "brightness_range": [0.5, 1.5]  # Random brightness change
         }
 
         gen = ImageDataGenerator(width_shift_range=params_map['w_r'], height_shift_range=params_map['h_r'],
@@ -45,36 +45,36 @@ class daugor(object):
                                  fill_mode="constant", brightness_range=params_map["brightness_range"])
         self.gen = gen
 
-    # 获得操作名称
+    # Get operation name
     def get_op_name(self, op):
-        # A 平移 B 中心裁剪 C 旋转 D调整亮度 E 调整对比度 F随机裁剪  G翻转 H 随机缩放
+        # A. Shift;  B. Center cut;  C. Rotation;  D. Brightness;  E. Contrast;  F. Cut;  G. Flip;  H. Zoom
         op_map = {
-            "A": '平移',
-            "B": '中心裁剪',
-            "C": '旋转',
-            "D": '调整亮度',
-            "E": '调整对比度',
-            "F": '随机裁剪',
-            "G": '翻转',
-            "H": '随机缩放',
+            "A": 'Shift',
+            "B": 'Center cut',
+            "C": 'Rotation',
+            "D": 'Adjust Brightness',
+            "E": 'Adjust Contrast',
+            "F": 'Cut',
+            "G": 'Flip',
+            "H": 'Zoom',
         }
         return op_map[op]
 
-    # 加载数据集
+    # load dataset
     def load_mnist(self):
         (x_train, y_train), (x_test, y_test) = mnist.load_data()
         x_test = x_test.astype('float32').reshape(-1, 28, 28, 1)
         x_train = x_train.astype('float32').reshape(-1, 28, 28, 1)
         return (x_train, y_train), (x_test, y_test)
 
-    # 扩增数据
-    def dau_datasets(self, num=10):
+    # augment data
+    def dau_datasets(self, num):
         self.init_dir()
         self.run("train", num=num)
         self.run("test", num=num)
 
-    def run(self, prefix, num=10):
-        for i in range(num):  # 扩增10倍
+    def run(self, prefix, num):
+        for i in range(num):
             img_list = []
             label_list = []
             ori_img_list = []
@@ -104,7 +104,7 @@ class daugor(object):
 if __name__ == '__main__':
     os.makedirs("./dau", exist_ok=True)
 
-    # 初始化参数
+    # Initialization parameters
     params = {
         "data_name": None,
         "width": None,

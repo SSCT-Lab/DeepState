@@ -93,19 +93,6 @@ class FashionLSTMClassifier:
 
         self.model.save(save_path)
 
-    def retrain1(self, ori_model_path, X_selected, Y_selected, X_val, Y_val, save_path):
-        self.create_model()
-        self.model.load_weights(ori_model_path, by_name=True)
-        Xa_train = self.input_preprocess(X_selected)
-        X_val = self.input_preprocess(X_val)
-        Ya_train = keras.utils.to_categorical(Y_selected, num_classes=10)
-        Y_val = keras.utils.to_categorical(Y_val, num_classes=10)
-        checkpoint = ModelCheckpoint(filepath=save_path, monitor='val_acc', mode='auto', save_best_only='True')
-        self.model.fit(Xa_train, Ya_train, validation_data=(X_val, Y_val),
-                       batch_size=self.batch_size, epochs=30, shuffle=False, callbacks=[checkpoint])
-
-        self.model.save(save_path)
-
     def evaluate_retrain(self, retrain_model_path, ori_model_path, x_val, y_val):
         x_val = self.input_preprocess(x_val)
         y_val = keras.utils.to_categorical(y_val, num_classes=10)
@@ -147,10 +134,3 @@ if __name__ == "__main__":
     # train an rnn model
     lstm_classifier.create_model()
     lstm_classifier.train(save_path)
-
-    # m = load_model("./models/fashion_lstm.h5")
-    # (x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
-    # lstm_classifier = FashionLSTMClassifier()
-    # x_test = lstm_classifier.input_preprocess(x_test)
-    # y_test = keras.utils.to_categorical(y_test, num_classes=10)
-    # print(m.evaluate(x_test, y_test)[1])

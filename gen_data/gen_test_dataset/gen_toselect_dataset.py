@@ -7,10 +7,10 @@ import random
 
 
 def gen_mnist():
-    x_test_data_path = "./gen_data/dau/mnist_harder/x_test_0.npy"
-    y_test_data_path = "./gen_data/dau/mnist_harder/y_test_0.npy"
-    ori_x_test_data_path = "./gen_data/dau/mnist_harder/x_ori_test_0.npy"
-    ori_y_test_data_path = "./gen_data/dau/mnist_harder/y_ori_test_0.npy"
+    x_test_data_path = "./dau/mnist_harder/x_test_0.npy"
+    y_test_data_path = "./dau/mnist_harder/y_test_0.npy"
+    ori_x_test_data_path = "./dau/mnist_harder/x_ori_test_0.npy"
+    ori_y_test_data_path = "./dau/mnist_harder/y_ori_test_0.npy"
 
     x_test_data = np.load(x_test_data_path)
     y_test_data = np.load(y_test_data_path)
@@ -18,10 +18,10 @@ def gen_mnist():
     ori_y_test_data = np.load(ori_y_test_data_path)
 
     # print(x_test_data.shape)  # 10000
-    os.makedirs("./gen_data/mnist_toselect", exist_ok=True)
+    os.makedirs("../../gen_data/mnist_toselect", exist_ok=True)
 
     li = np.arange(len(x_test_data))
-    for times in range(30):
+    for times in range(30):  # 30 different samples
         x_to_select_mnist = []
         y_to_select_mnist = []
         select_id = np.random.choice(a=li, size=3000, replace=False)
@@ -42,18 +42,18 @@ def gen_mnist():
         np.random.set_state(state)
         np.random.shuffle(y_save_data)
 
-        np.savez(("./gen_data/mnist_toselect/mnist_toselect" + "_{}").format(times), X=x_save_data, Y=y_save_data)
+        np.savez(("../../gen_data/mnist_toselect" + "_{}").format(times), X=x_save_data, Y=y_save_data)
 
 
 def gen_snips():
-    data = pd.read_csv("./gen_data/dau/snips_harder/to_select_intent.csv")
+    data = pd.read_csv("./dau/snips_harder/to_select_intent.csv")
     length = int(len(data) / 2)
     print("ori/aug legth:", length)
     ori = data[:int(len(data) / 2)]
     aug = data[int(len(data) / 2):]
     li = np.arange(len(ori))
 
-    os.makedirs("./gen_data/snips_toselect", exist_ok=True)
+    os.makedirs("../../gen_data/snips_toselect", exist_ok=True)
 
     for times in range(30):
         text, intent = [], []
@@ -72,14 +72,14 @@ def gen_snips():
             to_select.loc[idx] = tmp
 
         to_select.sample(frac=1)  # shuffle
-        to_select.to_csv(("./gen_data/snips_toselect/snips_toselect" + "_{}" + ".csv").format(times))
+        to_select.to_csv(("../../gen_data/snips_toselect/snips_toselect" + "_{}" + ".csv").format(times))
 
 
 def gen_fashion():
-    x_test_data_path = "./gen_data/dau/fashion_harder/x_test_0.npy"
-    y_test_data_path = "./gen_data/dau/fashion_harder/y_test_0.npy"
-    ori_x_test_data_path = "./gen_data/dau/fashion_harder/x_ori_test_0.npy"
-    ori_y_test_data_path = "./gen_data/dau/fashion_harder/y_ori_test_0.npy"
+    x_test_data_path = "./dau/fashion_harder/x_test_0.npy"
+    y_test_data_path = "./dau/fashion_harder/y_test_0.npy"
+    ori_x_test_data_path = "./dau/fashion_harder/x_ori_test_0.npy"
+    ori_y_test_data_path = "./dau/fashion_harder/y_ori_test_0.npy"
 
     x_test_data = np.load(x_test_data_path)
     y_test_data = np.load(y_test_data_path)
@@ -87,7 +87,7 @@ def gen_fashion():
     ori_y_test_data = np.load(ori_y_test_data_path)
 
     # print(x_test_data.shape)  # 10000
-    os.makedirs("./gen_data/fashion_toselect", exist_ok=True)
+    os.makedirs("../../gen_data/fashion_toselect", exist_ok=True)
 
     li = np.arange(len(x_test_data))
     for times in range(30):
@@ -111,7 +111,7 @@ def gen_fashion():
         np.random.set_state(state)
         np.random.shuffle(y_save_data)
 
-        np.savez(("./gen_data/fashion_toselect/fashion_toselect" + "_{}").format(times), X=x_save_data, Y=y_save_data)
+        np.savez(("../../gen_data/fashion_toselect" + "_{}").format(times), X=x_save_data, Y=y_save_data)
 
 
 if __name__ == '__main__':

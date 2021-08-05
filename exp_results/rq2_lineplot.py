@@ -4,7 +4,7 @@ import numpy as np
 
 
 def line_chart():
-    data = pd.read_csv("rq2/re_rq2_snips_blstm.csv")
+    data = pd.read_csv("rq2/rq2_snips_blstm.csv")
 
     datas = [data['random']*100, data['state']*100, data['RNNTestcov']*100, data['Stellarbscov']*100, data['Stellarbtcov']*100,
              data['testRNNsc']*100, data['testRNNsc_cam']*100, data['nc_ctm']*100, data['nc_cam']*100]
@@ -27,7 +27,7 @@ def line_chart():
     plt.ylabel('Inclusiveness', fontsize=24)
 
     # plt.show()
-    plt.savefig("./rq2-result-fig/re_rq2_snips_blstm.pdf", dpi=200, bbox_inches='tight')
+    plt.savefig("./rq2-result-fig/rq2_snips_blstm.pdf", dpi=200, bbox_inches='tight')
 
 
 if __name__ == '__main__':

@@ -105,24 +105,22 @@ def fashion_gru_abst():
 
 
 if __name__ == '__main__':
-    # parse = argparse.ArgumentParser(
-    #     "Generate the abstract model for DeepStellar-cov.")
-    # parse.add_argument('-test_obj', required=True, choices=['mnist_lstm', 'mnist_blstm',
-    #                                                         'snips_blstm', 'snips_gru',
-    #                                                         'fashion_lstm', 'fashion_gru'])
-    # args = parse.parse_args()
-    #
-    # if args.test_obj == "mnist_lstm":
-    #     mnist_lstm_abst()
-    # if args.test_obj == "mnist_blstm":
-    #     mnist_blstm_abst()
-    # if args.test_obj == "snips_blstm":
-    #     snips_blstm_abst()
-    # if args.test_obj == "snips_gru":
-    #     snips_gru_abst()
-    # if args.test_obj == "fashion_lstm":
-    #     fashion_lstm_abst()
-    # if args.test_obj == "fashion_gru":
-    #     fashion_gru_abst()
+    parse = argparse.ArgumentParser(
+        "Generate the abstract model for DeepStellar-cov.")
+    parse.add_argument('-test_obj', required=True, choices=['mnist_lstm', 'mnist_blstm',
+                                                            'snips_blstm', 'snips_gru',
+                                                            'fashion_lstm', 'fashion_gru'])
+    args = parse.parse_args()
 
-    snips_blstm_abst()
+    if args.test_obj == "mnist_lstm":
+        mnist_lstm_abst()
+    if args.test_obj == "mnist_blstm":
+        mnist_blstm_abst()
+    if args.test_obj == "snips_blstm":
+        snips_blstm_abst()
+    if args.test_obj == "snips_gru":
+        snips_gru_abst()
+    if args.test_obj == "fashion_lstm":
+        fashion_lstm_abst()
+    if args.test_obj == "fashion_gru":
+        fashion_gru_abst()

@@ -8,16 +8,17 @@ import sys
 import tensorflow as tf
 import keras.backend.tensorflow_backend as K
 
-# 指定第一块GPU可用
+# Specify that the first GPU is available, if there is no GPU, apply: "-1"
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 config = tf.compat.v1.ConfigProto()
-config.gpu_options.allow_growth = True   # 不全部占满显存, 按需分配
+config.gpu_options.allow_growth = True   # Do not occupy all of the video memory, allocate on demand
 sess = tf.compat.v1.Session(config=config)
 
 K.set_session(sess)
 
 
+# RQ3: Retrain the RNNs with selected data
 if __name__ == '__main__':
     parse = argparse.ArgumentParser("Calculate the inclusiveness for the selected dataset.")
     parse.add_argument('-dl_model', help='path of dl model', required=True)
@@ -143,15 +144,13 @@ if __name__ == '__main__':
 
     ori_acc_save, aug_acc_save, mix_acc_save = {}, {}, {}
 
-    pre_li = [100]
-    # pre_li = [1, 4, 8, 12, 16, 20]
+    pre_li = [1, 4, 8, 12, 16, 20]
     weight_state, unique_index_arr_id, stellar_bscov, stellar_btcov, \
-    rnntest_sc, nc_cov, nc_cam, rnntest_sc_cam, trend_set, right, gini = get_selection_information(
+    rnntest_sc, nc_cov, nc_cam, rnntest_sc_cam, trend_set, right = get_selection_information(
         to_select_path, model, lstm_classifier, dense_model, wrapper_path, w2v_path, time_steps)
 
-    # select_method = ['state_w_selected', 'random_selected', 'cov_selected', 'bscov_selected', 'btcov_selected',
-    #                  'sc_ctm_selected', 'sc_cam_selected', 'nc_ctm_selected', 'nc_cam_selected']
-    select_method = ['random_selected']
+    select_method = ['state_w_selected', 'random_selected', 'cov_selected', 'bscov_selected', 'btcov_selected',
+                     'sc_ctm_selected', 'sc_cam_selected', 'nc_ctm_selected', 'nc_cam_selected']
     for item in select_method:
         ori_acc_save[item] = []
         aug_acc_save[item] = []
@@ -180,7 +179,7 @@ if __name__ == '__main__':
             print("len(X_selected_array):", len(X_selected_array))
             retrained_model_path = retrain_save_path + str(pre) + "/" + str(method_item) + "_" + \
                                    str(args.dataset) + "_" + str(args.model_type) + ".h5"
-            if not os.path.isfile(retrained_model_path):  # 没有被保存过，需要训练
+            if not os.path.isfile(retrained_model_path):  # Has not been saved, needs to be trained
                 os.makedirs(retrain_save_path + str(pre), exist_ok=True)
                 lstm_classifier.retrain(X_selected_array, Y_selected_array, x_aug_val, y_aug_val, retrained_model_path)
 
@@ -201,7 +200,7 @@ if __name__ == '__main__':
             print("{}_{}: ".format("aug_acc_imp", method_item), round(aug_imp_tmp * 100, 2))
             print("{}_{}: ".format("mix_acc_imp", method_item), round(mix_imp_tmp * 100, 2))
 
-    # ===== for the line plot fig ==========
+    # ======== for the line plot fig ========
     # result_dict = {}
     # result_dict['select rate'] = pre_li
     # for method_item in select_method:
@@ -213,7 +212,8 @@ if __name__ == '__main__':
     # df = pd.DataFrame(result_dict)
     # df.to_csv("./exp_results/rq3/line_rq3_{}_{}.csv".format(args.dataset, args.model_type))
 
-    # -------final result--------
+
+    # ======== final result ========
     result_dict = {}
     result_dict['select rate'] = pre_li
     for method_item in select_method:

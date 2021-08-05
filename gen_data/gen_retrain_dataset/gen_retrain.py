@@ -30,7 +30,7 @@ def gen_fashion():
     x_retrain_mix_test, y_retrain_mix_test = [], []
     aug_or_ori = []  # aug: 1, ori: 0
 
-    # train 的一共是6k, 加上 6k 扩增数样本, 组成 to_select_dataset
+    # The total of train is 6k, plus 6k amplified samples to form to_select_dataset
     for i in range(len(train_x_ori_data)):  # 12000
         d1 = train_x_ori_data[i].reshape(1, 28, 28)
         x_to_select_mnist.append(d1)
@@ -101,7 +101,7 @@ def gen_mnist():
     x_retrain_mix_test, y_retrain_mix_test = [], []
     aug_or_ori = []  # aug: 1, ori: 0
 
-    # train 的一共是6k, 加上 6k 扩增数样本, 组成 to_select_dataset
+    # The total of train is 6k, plus 6k amplified samples to form to_select_dataset
     for i in range(len(train_x_ori_data)):  # 12000
         d1 = train_x_ori_data[i].reshape(1, 28, 28)
         x_to_select_mnist.append(d1)
@@ -150,7 +150,7 @@ def gen_snips():
     data = pd.read_csv("./dau/snips_harder/testdata_ori_aug.csv")
     length = int(len(data) / 2)
     print("ori/aug length:", length)
-    ori = data[:int(len(data) / 2)]  # 前面一半是ori，后面一半是aug
+    ori = data[:int(len(data) / 2)]  # The front half is ori, the back half is aug
 
     text_ori, intent_ori = [], []
     text_aug, intent_aug = [], []
@@ -187,6 +187,15 @@ def gen_snips():
 
 
 if __name__ == '__main__':
-    gen_fashion()
-    gen_mnist()
-    # gen_snips()
+    parse = argparse.ArgumentParser("Generate the to-be-selected dataset for retrain.")
+    parse.add_argument('-dataset', required=True, choices=['mnist', 'snips', 'fashion'])
+    args = parse.parse_args()
+
+    if args.dataset == "mnist":
+        gen_mnist()
+
+    if args.dataset == "snips":
+        gen_snips()
+
+    if args.dataset == "fashion":
+        gen_fashion()

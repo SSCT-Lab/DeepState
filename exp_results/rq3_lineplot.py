@@ -16,12 +16,6 @@ def line_chart():
              data['sc_ctm_selected_aug'], data['sc_cam_selected_aug'],
              data['nc_ctm_selected_aug'], data['nc_cam_selected_aug']]
 
-    # datas = [data['random_selected_ori'], data['state_w_selected_ori'],
-    #          data['cov_selected_ori'],
-    #          data['bscov_selected_ori'], data['btcov_selected_ori'],
-    #          data['sc_ctm_selected_ori'], data['sc_cam_selected_ori'],
-    #          data['nc_ctm_selected_ori'], data['nc_cam_selected_ori']]
-
     labels = ['Random', 'DeepState', 'RNNTest-HSCov(CAM)', 'DeepStellar-BSCov(CTM)', 'DeepStellar-BTCov(CTM)',
               'testRNN-SC(CTM)', 'testRNN-SC(CAM)', 'NC(CTM)', 'NC(CAM)', ]  # 图例
 
@@ -41,7 +35,6 @@ def line_chart():
     plt.legend(fontsize=12)
     plt.xticks(x, [i for i in x], fontsize=18)
     plt.yticks(fontsize=18)
-    # plt.yticks(np.arange(71, 80))
     plt.xlabel('Selection rate', fontsize=19)
     plt.ylabel('Acc Imp (aug)', fontsize=19)
 

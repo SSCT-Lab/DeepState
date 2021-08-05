@@ -22,12 +22,6 @@ class FashionGRUClassifier:
         self.n_epochs = 30
 
     def create_model(self):
-        # self.model = Sequential()
-        # self.model.add(LSTM(self.n_units, input_shape=(self.time_steps, self.n_inputs), dropout=0.4, name="lstm"))
-        # self.model.add(Dense(self.n_classes, activation='softmax', name="dense"))
-        # self.model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-        # # self.model.summary()
-
         input = Input(shape=(self.time_steps, self.n_inputs))
         lstm = GRU(self.n_units, return_sequences=True, dropout=0.3, name='lstm')(input)
         last_timestep = Lambda(lambda x: x[:, -1, :])(lstm)
@@ -95,19 +89,6 @@ class FashionGRUClassifier:
         checkpoint = ModelCheckpoint(filepath=save_path, monitor='val_acc', mode='auto', save_best_only='True')
         self.model.fit(Xa_train, Ya_train, validation_data=(X_val, Y_val),
                        batch_size=self.batch_size, epochs=self.n_epochs, shuffle=False, callbacks=[checkpoint])
-
-        self.model.save(save_path)
-
-    def retrain1(self, ori_model_path, X_selected, Y_selected, X_val, Y_val, save_path):
-        self.create_model()
-        self.model.load_weights(ori_model_path, by_name=True)
-        Xa_train = self.input_preprocess(X_selected)
-        X_val = self.input_preprocess(X_val)
-        Ya_train = keras.utils.to_categorical(Y_selected, num_classes=10)
-        Y_val = keras.utils.to_categorical(Y_val, num_classes=10)
-        checkpoint = ModelCheckpoint(filepath=save_path, monitor='val_acc', mode='auto', save_best_only='True')
-        self.model.fit(Xa_train, Ya_train, validation_data=(X_val, Y_val),
-                       batch_size=self.batch_size, epochs=30, shuffle=False, callbacks=[checkpoint])
 
         self.model.save(save_path)
 

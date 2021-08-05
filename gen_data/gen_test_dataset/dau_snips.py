@@ -61,9 +61,9 @@ def aug_sentence(sentence, choose_aug):
 
 
 if __name__ == '__main__':
-    model_dir = "../../code/nlp_model/"
-    os.makedirs("./gen_data/dau", exist_ok=True)
-    data = pd.read_csv("./dau/snips_harder/new_intent.csv")
+    model_dir = "./nlp_model/"
+    os.makedirs("./dau/snips_harder", exist_ok=True)
+    data = pd.read_csv("../new_intent.csv")
     to_be_aug_data = data[:500]
     # selected_data = to_be_aug_data.sample(n=1000)
 
@@ -101,4 +101,4 @@ if __name__ == '__main__':
         aug_data.loc[idx] = aug
         idx = idx + 1
 
-    aug_data.to_csv("./gen_data/dau/snips_harder/snips_toselect.csv")
+    aug_data.to_csv("./dau/snips_harder/snips_toselect.csv")

@@ -37,12 +37,12 @@ def process_data(data_path, save_path):
     embedding_matrix = w2v_model.wv.vectors
     np.save(embedding_matrix_save_path, embedding_matrix)
 
-    # 取得所有单词
+    # Get all words
     vocab_list = list(w2v_model.wv.vocab.keys())
-    # 每个词语对应的索引
+    # Index corresponding to each word
     word_index = {word: index for index, word in enumerate(vocab_list)}
 
-    # 序列化
+    # Serialization
     def get_index(sentence):
         sequence = []
         for word in sentence:
@@ -54,26 +54,26 @@ def process_data(data_path, save_path):
 
     X_data = list(map(get_index, words))
 
-    maxlen = 16  # 截长补短
+    maxlen = 16
     X_pad = pad_sequences(X_data, maxlen=maxlen)
 
-    # 取得标签
+    # Get the labels
     df = pd.read_csv(data_path)
     intent_ = df["intent"]
     intent = [intent_dic[i] for i in intent_]
     Y = keras.utils.to_categorical(intent, num_classes=7)
 
-    # 划分数据集
+    # Split dataset
     # X_train, X_test, Y_train, Y_test = train_test_split(X_pad, Y, test_size=0.2, shuffle=False)
     X_train = X_pad[500:9990]  # 0:999(to select) 999:9990(train) 9990:12488(test)
     X_test = X_pad[9990:]
     Y_train = Y[500:9990]
     Y_test = Y[9990:]
 
-    # 让 Keras 的 Embedding 层使用训练好的Word2Vec权重
+    # Let Keras' Embedding layer use the trained Word2Vec weights
     embedding_matrix = w2v_model.wv.vectors
 
-    # 这些应该被存在npz里，避免每次执行都重新生成一次
+    # These should be stored in npz to avoid regenerating each time it is executed
     np.savez(standard_data_save_path, X_train=X_train, Y_train=Y_train, X_test=X_test, Y_test=Y_test)
     np.save(embedding_matrix_save_path, embedding_matrix)
     w2v_model.save(w2v_model_save_path)

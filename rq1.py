@@ -9,11 +9,11 @@ import os
 import tensorflow as tf
 import keras.backend.tensorflow_backend as K
 
-# 指定第一块GPU可用
+# Specify that the first GPU is available, if there is no GPU, apply: "-1"
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 config = tf.compat.v1.ConfigProto()
-config.gpu_options.allow_growth = True   # 不全部占满显存, 按需分配
+config.gpu_options.allow_growth = True   # Do not occupy all of the video memory, allocate on demand
 sess = tf.compat.v1.Session(config=config)
 
 K.set_session(sess)
@@ -120,7 +120,7 @@ if __name__ == '__main__':
         sys.exit(1)
 
     state_w_bdr, ran_bdr, RNNTestcov_bdr, Stellarbscov_bdr, Stellarbtcov_bdr, \
-    sc_ctm_bdr, sc_cam_bdr, nc_ctm_bdr, nc_cam_bdr, gini_bdr = {}, {}, {}, {}, {}, {}, {}, {}, {}, {}
+    sc_ctm_bdr, sc_cam_bdr, nc_ctm_bdr, nc_cam_bdr = {}, {}, {}, {}, {}, {}, {}, {}, {}
     pre_li = [10, 20, 50]
     for i in pre_li:
         state_w_bdr[i] = []
@@ -132,7 +132,6 @@ if __name__ == '__main__':
         sc_cam_bdr[i] = []
         nc_ctm_bdr[i] = []
         nc_cam_bdr[i] = []
-        gini_bdr[i] = []
 
     files = os.listdir(to_select_path)
     for file in files:
@@ -141,7 +140,7 @@ if __name__ == '__main__':
         file_path = to_select_path + "/" + file
 
         weight_state, unique_index_arr_id, stellar_bscov, stellar_btcov, rnntest_sc, nc_cov, nc_cam, \
-        rnntest_sc_cam, trend_set, right, gini = get_selection_information(file_path, model, lstm_classifier,
+        rnntest_sc_cam, trend_set, right = get_selection_information(file_path, model, lstm_classifier,
                                                                      dense_model, wrapper_path, w2v_path, time_steps)
 
         for pre in pre_li:
@@ -157,7 +156,6 @@ if __name__ == '__main__':
             sc_cam_selected = nc_cam_selection(np.array(rnntest_sc_cam), total_num, select_num)
             nc_ctm_selected = ctm_selection(np.array(nc_cov), total_num, select_num)
             nc_cam_selected = nc_cam_selection(np.array(nc_cam), total_num, select_num)
-            gini_selected = ctm_selection(np.array(gini), total_num, select_num)
 
             state_w_R, state_w_P, _, _, _ = selection_evaluate(right, state_w_selected)
             random_R, random_P, _, _, _ = selection_evaluate(right, random_selected)
@@ -168,7 +166,6 @@ if __name__ == '__main__':
             sc_cam_R, sc_cam_P, _, _, _ = selection_evaluate(right, sc_cam_selected)
             nc_ctm_R, nc_ctm_P, _, _, _ = selection_evaluate(right, nc_ctm_selected)
             nc_cam_R, nc_cam_P, _, _, _ = selection_evaluate(right, nc_cam_selected)
-            gini_R, gini_P, _, _, _ = selection_evaluate(right, gini_selected)
 
             state_w_bdr[pre].append(state_w_P)
             ran_bdr[pre].append(random_P)
@@ -179,9 +176,8 @@ if __name__ == '__main__':
             sc_cam_bdr[pre].append(sc_cam_P)
             nc_ctm_bdr[pre].append(nc_ctm_P)
             nc_cam_bdr[pre].append(nc_cam_P)
-            gini_bdr[pre].append(gini_P)
 
-        print(state_w_bdr, ran_bdr, RNNTestcov_bdr, Stellarbscov_bdr, Stellarbtcov_bdr, sc_ctm_bdr, gini_bdr)
+        print(state_w_bdr, ran_bdr, RNNTestcov_bdr, Stellarbscov_bdr, Stellarbtcov_bdr, sc_ctm_bdr)
 
     result_dict = {'state_w10': state_w_bdr[10], 'state_w20': state_w_bdr[20], 'state_w50': state_w_bdr[50],
                    'random10': ran_bdr[10], 'random20': ran_bdr[20], 'random50': ran_bdr[50],
@@ -194,9 +190,8 @@ if __name__ == '__main__':
                    'testRNNsc10': sc_ctm_bdr[10], 'testRNNsc20': sc_ctm_bdr[20], 'testRNNsc50': sc_ctm_bdr[50],
                    'testRNNsc_cam10': sc_cam_bdr[10], 'testRNNsc_cam20': sc_cam_bdr[20], 'testRNNsc_cam50': sc_cam_bdr[50],
                    'nc_ctm10': nc_ctm_bdr[10], 'nc_ctm20': nc_ctm_bdr[20], 'nc_ctm50': nc_ctm_bdr[50],
-                   'nc_cam10': nc_cam_bdr[10], 'nc_cam20': nc_cam_bdr[20], 'nc_cam50': nc_cam_bdr[50],
-                   'gini10': gini_bdr[10], 'gini20': gini_bdr[20], 'gini50': gini_bdr[50]}
+                   'nc_cam10': nc_cam_bdr[10], 'nc_cam20': nc_cam_bdr[20], 'nc_cam50': nc_cam_bdr[50]}
     # print(result_dict)
     df = pd.DataFrame(result_dict)
     os.makedirs("./exp_results/rq1", exist_ok=True)
-    df.to_csv("./exp_results/rq1/re_rq1_{}_{}.csv".format(args.dataset, args.model_type))
+    df.to_csv("./exp_results/rq1/rq1_{}_{}.csv".format(args.dataset, args.model_type))

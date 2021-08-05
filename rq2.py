@@ -8,16 +8,17 @@ import sys
 import tensorflow as tf
 import keras.backend.tensorflow_backend as K
 
-# 指定第一块GPU可用
+# Specify that the first GPU is available, if there is no GPU, apply: "-1"
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 config = tf.compat.v1.ConfigProto()
-config.gpu_options.allow_growth = True   # 不全部占满显存, 按需分配
+config.gpu_options.allow_growth = True   # Do not occupy all of the video memory, allocate on demand
 sess = tf.compat.v1.Session(config=config)
 
 K.set_session(sess)
 
 
+# RQ2: The inclusiveness on {1%, 2%, ..., 40%} selected test set.
 if __name__ == '__main__':
     parse = argparse.ArgumentParser("Calculate the inclusiveness for the selected dataset.")
     parse.add_argument('-dl_model', help='path of dl model', required=True)
@@ -118,12 +119,12 @@ if __name__ == '__main__':
         sys.exit(1)
 
     weight_state, unique_index_arr_id, stellar_bscov, stellar_btcov, rnntest_sc, nc_cov, nc_cam, \
-    rnntest_sc_cam, trend_set, right, gini = get_selection_information(file_path, model, lstm_classifier,
+    rnntest_sc_cam, trend_set, right = get_selection_information(file_path, model, lstm_classifier,
                                                                  dense_model, wrapper_path, w2v_path, time_steps)
     state_w_in, ran_in, RNNTestcov_in, Stellarbscov_in, Stellarbtcov_in, sc_ctm_in, sc_cam_in, \
-    nc_ctm_in, nc_cam_in, gini_in = [], [], [], [], [], [], [], [], [], []
+    nc_ctm_in, nc_cam_in = [], [], [], [], [], [], [], [], []
 
-    for pre in range(101):
+    for pre in range(41):
         select_num = int(total_num * 0.01 * pre)
 
         # selection
@@ -136,7 +137,6 @@ if __name__ == '__main__':
         sc_cam_selected = nc_cam_selection(np.array(rnntest_sc_cam), total_num, select_num)
         nc_ctm_selected = ctm_selection(np.array(nc_cov), total_num, select_num)
         nc_cam_selected = nc_cam_selection(np.array(nc_cam), total_num, select_num)
-        gini_selected = ctm_selection(np.array(gini), total_num, select_num)
 
         state_w_R, state_w_P, _, _, _ = selection_evaluate(right, state_w_selected)
         random_R, random_P, _, _, _ = selection_evaluate(right, random_selected)
@@ -147,7 +147,6 @@ if __name__ == '__main__':
         sc_cam_R, sc_cam_P, _, _, _ = selection_evaluate(right, sc_cam_selected)
         nc_ctm_R, nc_ctm_P, _, _, _ = selection_evaluate(right, nc_ctm_selected)
         nc_cam_R, nc_cam_P, _, _, _ = selection_evaluate(right, nc_cam_selected)
-        gini_R, gini_P, _, _, _ = selection_evaluate(right, gini_selected)
 
         state_w_in.append(state_w_R)
         ran_in.append(random_R)
@@ -158,12 +157,11 @@ if __name__ == '__main__':
         sc_cam_in.append(sc_cam_R)
         nc_ctm_in.append(nc_ctm_R)
         nc_cam_in.append(nc_cam_R)
-        gini_in.append(gini_R)
 
     result_dict = {'state': state_w_in, 'random': ran_in, 'RNNTestcov': RNNTestcov_in, 'Stellarbscov': Stellarbscov_in,
                    'Stellarbtcov': Stellarbtcov_in, 'testRNNsc': sc_ctm_in, 'testRNNsc_cam': sc_cam_in,
-                   'nc_ctm': nc_ctm_in, 'nc_cam': nc_cam_in, 'gini': gini_in}
+                   'nc_ctm': nc_ctm_in, 'nc_cam': nc_cam_in}
     # print(result_dict)
     df = pd.DataFrame(result_dict)
     os.makedirs("./exp_results/rq2", exist_ok=True)
-    df.to_csv("./exp_results/rq2/re_rq2_{}_{}.csv".format(args.dataset, args.model_type))
+    df.to_csv("./exp_results/rq2/rq2_{}_{}.csv".format(args.dataset, args.model_type))

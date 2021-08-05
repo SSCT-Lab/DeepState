@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 
 def rq1_result_box():
-    data = pd.read_csv("rq1/re_rq1_snips_blstm.csv")
+    data = pd.read_csv("rq1/rq1_snips_blstm.csv")
     labels = ['BTCov(CTM)', 'BSCov(CTM)', 'NC(CTM)', 'NC(CAM)', 'SC(CTM)', 'SC(CAM)',
               'HSCov(CAM)', 'Random', 'DeepState']  # 图例
 
@@ -27,7 +27,7 @@ def rq1_result_box():
         plt.yticks(fontsize=18)
 
         # plt.show()
-        plt.savefig(f"./rq1-result-fig/re_rq1_snips_blstm_{r}.pdf", dpi=200, bbox_inches='tight')
+        plt.savefig(f"./rq1-result-fig/rq1_snips_blstm_{r}.pdf", dpi=200, bbox_inches='tight')
 
 
 if __name__ == '__main__':

@@ -58,7 +58,7 @@ def get_selection_information(file_path, model, lstm_classifier, dense_model, wr
         X, Y = process_snips_data(file_path, w2v_path)
 
     weight_state, stellar_bscov, stellar_btcov, rnntest_sc, rnntest_sc_cam, nc_cov, nc_cam = [], [], [], [], [], [], []
-    right, hscov_max_index, trend_set, gini_value = [], [], [], []
+    right, hscov_max_index, trend_set = [], [], []
     act_set = set()
     act_time_set = set()
 
@@ -71,18 +71,17 @@ def get_selection_information(file_path, model, lstm_classifier, dense_model, wr
             y_test = y
 
         classify_out_list, plus_sum, minus_sum = [], [], []
-        gini = 0
         lstm_out = model.predict(x_test)[1]
 
         # hs_cov
-        hscov_max_index.append(np.argmax(lstm_out[0]))  # 此用例激活的lstm_out矩阵的index
+        hscov_max_index.append(np.argmax(lstm_out[0]))  # The index of the lstm_out matrix activated by this use case
 
         # nc_cov
         act = get_nc_activate(lstm_out)
         nc = len(act) / lstm_out[0].size if len(act) != 0 else 0
         nc_cov.append(nc)
         diff = act - act_set
-        if not diff:  # True 代表是空集，即没有新的act
+        if not diff:  # True represents an empty set, i.e., there is no new act
             nc_cam.append(0)
         else:
             act_set = act_set.union(act)
@@ -103,13 +102,8 @@ def get_selection_information(file_path, model, lstm_classifier, dense_model, wr
         trend_set.append(get_change_set(classify_out_list))
         weight_state.append(cacl_change_rate_with_weights(classify_out_list))
 
-        # check the predict result the right or wrong
+        # check the predict result is right or wrong
         check_predict_result(int(classify_out_list[-1]), int(np.argmax(y_test)), right)
-
-        # gini
-        for i in range(0, len(tmp[0])):
-            gini += np.square(tmp[0][i])
-        gini_value.append(1-gini)
 
         # Stellar Coverage
         BSCov, BTCov = get_stellar_cov(lstm_classifier, model, x, wrapper_path)
@@ -120,7 +114,7 @@ def get_selection_information(file_path, model, lstm_classifier, dense_model, wr
         SC, acted_time = get_testrnn_sc(plus_sum, minus_sum)
         rnntest_sc.append(SC)
         diff_acted_time = acted_time - act_time_set
-        if not diff_acted_time:  # True 代表是空集，即没有新的act
+        if not diff_acted_time:  # True represents an empty set, i.e., there is no new act
             rnntest_sc_cam.append(0)
         else:
             act_time_set = act_time_set.union(acted_time)
@@ -130,7 +124,7 @@ def get_selection_information(file_path, model, lstm_classifier, dense_model, wr
     unique_index_arr, unique_index_arr_id = np.unique(hscov_max_index, return_index=True)
 
     return weight_state, unique_index_arr_id, np.array(stellar_bscov), np.array(stellar_btcov), np.array(rnntest_sc), \
-           np.array(nc_cov), np.array(nc_cam), np.array(rnntest_sc_cam), trend_set, right, gini_value
+           np.array(nc_cov), np.array(nc_cam), np.array(rnntest_sc_cam), trend_set, right
 
 
 def get_selected_data(file_path, selected_li, w2v_path):
