@@ -67,12 +67,12 @@ def gen_fashion():
         x_retrain_aug_test.append(dd2)
         y_retrain_aug_test.append(test_y_aug_data[p])
 
-    os.makedirs("./fashion_retrain", exist_ok=True)
-    np.savez("./fashion_retrain/fashion_toselect", X=x_save_data, Y=y_save_data)
-    np.save("./fashion_retrain/data_type", aug_or_ori)
-    np.savez("./fashion_retrain/fashion_ori_test", X=x_retrain_ori_test, Y=y_retrain_ori_test)
-    np.savez("./fashion_retrain/fashion_aug_test", X=x_retrain_aug_test, Y=y_retrain_aug_test)
-    np.savez("./fashion_retrain/fashion_mix_test", X=x_retrain_mix_test, Y=y_retrain_mix_test)
+    os.makedirs("../../gen_data/fashion_retrain", exist_ok=True)
+    np.savez("../../gen_data/fashion_retrain/fashion_toselect", X=x_save_data, Y=y_save_data)
+    np.save("../../gen_data/fashion_retrain/data_type", aug_or_ori)
+    np.savez("../../gen_data/fashion_retrain/fashion_ori_test", X=x_retrain_ori_test, Y=y_retrain_ori_test)
+    np.savez("../../gen_data/fashion_retrain/fashion_aug_test", X=x_retrain_aug_test, Y=y_retrain_aug_test)
+    np.savez("../../gen_data/fashion_retrain/fashion_mix_test", X=x_retrain_mix_test, Y=y_retrain_mix_test)
 
 
 def gen_mnist():
@@ -138,12 +138,12 @@ def gen_mnist():
         x_retrain_aug_test.append(dd2)
         y_retrain_aug_test.append(test_y_aug_data[p])
 
-    os.makedirs("./mnist_retrain", exist_ok=True)
-    np.savez("./mnist_retrain/mnist_toselect", X=x_save_data, Y=y_save_data)
-    np.save("./mnist_retrain/data_type", aug_or_ori)
-    np.savez("./mnist_retrain/mnist_ori_test", X=x_retrain_ori_test, Y=y_retrain_ori_test)
-    np.savez("./mnist_retrain/mnist_aug_test", X=x_retrain_aug_test, Y=y_retrain_aug_test)
-    np.savez("./mnist_retrain/mnist_mix_test", X=x_retrain_mix_test, Y=y_retrain_mix_test)
+    os.makedirs("../../gen_data/mnist_retrain", exist_ok=True)
+    np.savez("../../gen_data/mnist_retrain/mnist_toselect", X=x_save_data, Y=y_save_data)
+    np.save("../../gen_data/mnist_retrain/data_type", aug_or_ori)
+    np.savez("../../gen_data/mnist_retrain/mnist_ori_test", X=x_retrain_ori_test, Y=y_retrain_ori_test)
+    np.savez("../../gen_data/mnist_retrain/mnist_aug_test", X=x_retrain_aug_test, Y=y_retrain_aug_test)
+    np.savez("../../gen_data/mnist_retrain/mnist_mix_test", X=x_retrain_mix_test, Y=y_retrain_mix_test)
 
 
 def gen_snips():
@@ -180,10 +180,10 @@ def gen_snips():
         tmp = {'text': text_i, 'intent': intent_i}
         mix_test.loc[idx] = tmp
 
-    os.makedirs("./snips_retrain", exist_ok=True)
-    ori_test.to_csv("./snips_retrain/snips_ori_test.csv")
-    aug_test.to_csv("./snips_retrain/snips_aug_test.csv")
-    mix_test.to_csv("./snips_retrain/snips_mix_test.csv")
+    os.makedirs("../../gen_data/snips_retrain", exist_ok=True)
+    ori_test.to_csv("../../gen_data/snips_retrain/snips_ori_test.csv")
+    aug_test.to_csv("../../gen_data/snips_retrain/snips_aug_test.csv")
+    mix_test.to_csv("../../gen_data/snips_retrain/snips_mix_test.csv")
 
 
 if __name__ == '__main__':

@@ -46,7 +46,7 @@ def gen_mnist():
 
 
 def gen_snips():
-    data = pd.read_csv("./dau/snips_harder/to_select_intent.csv")
+    data = pd.read_csv("./dau/snips_harder/snips_toselect.csv")
     length = int(len(data) / 2)
     print("ori/aug legth:", length)
     ori = data[:int(len(data) / 2)]

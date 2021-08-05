@@ -10,6 +10,11 @@ from nlpaug.util import Action
 import csv
 import os
 
+from nlpaug.util.file.download import DownloadUtil
+DownloadUtil.download_word2vec(dest_dir='./nlp_model/')  # Download word2vec model
+DownloadUtil.download_glove(model_name='glove.6B', dest_dir='./nlp_model/')  # Download GloVe model
+DownloadUtil.download_fasttext(model_name='wiki-news-300d-1M', dest_dir='./nlp_model/')  # Download fasttext model
+
 
 def replace_synonym(text):
     aug = naw.SynonymAug(aug_src='wordnet')
