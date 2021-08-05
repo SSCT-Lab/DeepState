@@ -106,7 +106,7 @@ def selection(change_rate_li, trend, n):
                     tmp_trend2 = trend[place_li[k]]
                     tmp_sim = calc_Jaccard_sim(tmp_trend1, tmp_trend2)  # sim越大，相似性越高
                     # print("tmp_sim between case", place_li[j], "and", place_li[k], "is", tmp_sim)   #
-                    if tmp_sim > 0.5:  # 0.5
+                    if tmp_sim > 0.5:  # 0.2
                         selected[place_li[k]] = -1
                     # else:
                     #     selected[place_li[k]] = 1

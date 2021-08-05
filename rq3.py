@@ -41,7 +41,7 @@ if __name__ == '__main__':
         mix_val_path = "./gen_data/mnist_retrain/mnist_mix_test.npz"
         retrain_save_path = "./RNNModels/mnist_demo/models/lstm_selected_"
         wrapper_path = "./RNNModels/mnist_demo/output/lstm/abst_model/wrapper_lstm_mnist_3_10.pkl"
-        total_num = 15000
+        total_num = 16000
 
     elif args.model_type == "blstm" and args.dataset == "mnist":
         time_steps = 28
@@ -59,7 +59,7 @@ if __name__ == '__main__':
         mix_val_path = "./gen_data/mnist_retrain/mnist_mix_test.npz"
         retrain_save_path = "./RNNModels/mnist_demo/models/blstm_selected_"
         wrapper_path = "./RNNModels/mnist_demo/output/blstm/abst_model/wrapper_blstm_mnist_3_10.pkl"
-        total_num = 15000
+        total_num = 16000
 
     elif args.model_type == "blstm" and args.dataset == "snips":
         time_steps = 16
@@ -72,14 +72,14 @@ if __name__ == '__main__':
         dense_classifier = SnipsBLSTMClassifier()
         dense_model = dense_classifier.reload_dense(args.dl_model)
 
-        to_select_path = "gen_data/snips_retrain/to_select_intent.csv"
+        to_select_path = "gen_data/snips_retrain/snips_toselect2000.csv"
         ori_val_path = "./gen_data/snips_retrain/snips_ori_test.csv"
         aug_val_path = "./gen_data/snips_retrain/snips_aug_test.csv"
         mix_val_path = "./gen_data/snips_retrain/snips_mix_test.csv"
         retrain_save_path = "./RNNModels/snips_demo/models/blstm_selected_"
         wrapper_path = "./RNNModels/snips_demo/output/blstm/abst_model/wrapper_blstm_snips_3_10.pkl"
         w2v_path = "./RNNModels/snips_demo/save/w2v_model"
-        total_num = 2500
+        total_num = 2000
 
     elif args.model_type == "gru" and args.dataset == "snips":
         time_steps = 16
@@ -92,14 +92,14 @@ if __name__ == '__main__':
         dense_classifier = SnipsGRUClassifier()
         dense_model = dense_classifier.reload_dense(args.dl_model)
 
-        to_select_path = "gen_data/snips_retrain/to_select_intent.csv"
+        to_select_path = "gen_data/snips_retrain/snips_toselect2000.csv"
         ori_val_path = "./gen_data/snips_retrain/snips_ori_test.csv"
         aug_val_path = "./gen_data/snips_retrain/snips_aug_test.csv"
         mix_val_path = "./gen_data/snips_retrain/snips_mix_test.csv"
         retrain_save_path = "./RNNModels/snips_demo/models/gru_selected_"
         wrapper_path = "./RNNModels/snips_demo/output/gru/abst_model/wrapper_gru_snips_3_10.pkl"
         w2v_path = "./RNNModels/snips_demo/save/w2v_model"
-        total_num = 2500
+        total_num = 2000
 
     elif args.model_type == "lstm" and args.dataset == "fashion":
         time_steps = 28
@@ -117,7 +117,7 @@ if __name__ == '__main__':
         mix_val_path = "./gen_data/fashion_retrain/fashion_mix_test.npz"
         retrain_save_path = "./RNNModels/fashion_demo/models/lstm_selected_"
         wrapper_path = "./RNNModels/fashion_demo/output/lstm/abst_model/wrapper_lstm_fashion_3_10.pkl"
-        total_num = 15000
+        total_num = 16000
 
     elif args.model_type == "gru" and args.dataset == "fashion":
         time_steps = 28
@@ -135,7 +135,7 @@ if __name__ == '__main__':
         mix_val_path = "./gen_data/fashion_retrain/fashion_mix_test.npz"
         retrain_save_path = "./RNNModels/fashion_demo/models/gru_selected_"
         wrapper_path = "./RNNModels/fashion_demo/output/gru/abst_model/wrapper_gru_fashion_3_10.pkl"
-        total_num = 15000
+        total_num = 16000
 
     else:
         print("The model and data set are incorrect.")
@@ -143,15 +143,15 @@ if __name__ == '__main__':
 
     ori_acc_save, aug_acc_save, mix_acc_save = {}, {}, {}
 
+    pre_li = [100]
     # pre_li = [1, 4, 8, 12, 16, 20]
-    pre_li = [20]
-    weight_state, unique_index_arr_id, stellar_bscov, stellar_btcov, rnntest_sc, nc_cov, nc_cam, \
-    rnntest_sc_cam, trend_set, right = get_selection_information(to_select_path, model, lstm_classifier,
-                                                                 dense_model, wrapper_path, w2v_path, time_steps)
+    weight_state, unique_index_arr_id, stellar_bscov, stellar_btcov, \
+    rnntest_sc, nc_cov, nc_cam, rnntest_sc_cam, trend_set, right, gini = get_selection_information(
+        to_select_path, model, lstm_classifier, dense_model, wrapper_path, w2v_path, time_steps)
 
-    select_method = ['state_w_selected', 'random_selected', 'cov_selected', 'bscov_selected', 'btcov_selected',
-                     'sc_ctm_selected', 'sc_cam_selected', 'nc_ctm_selected', 'nc_cam_selected']
-    # select_method = ['state_w_selected', 'random_selected', 'cov_selected']
+    # select_method = ['state_w_selected', 'random_selected', 'cov_selected', 'bscov_selected', 'btcov_selected',
+    #                  'sc_ctm_selected', 'sc_cam_selected', 'nc_ctm_selected', 'nc_cam_selected']
+    select_method = ['random_selected']
     for item in select_method:
         ori_acc_save[item] = []
         aug_acc_save[item] = []
@@ -177,6 +177,7 @@ if __name__ == '__main__':
 
         for method_item in select_method:
             X_selected_array, Y_selected_array = get_selected_data(to_select_path, np.array(eval(method_item)), w2v_path)
+            print("len(X_selected_array):", len(X_selected_array))
             retrained_model_path = retrain_save_path + str(pre) + "/" + str(method_item) + "_" + \
                                    str(args.dataset) + "_" + str(args.model_type) + ".h5"
             if not os.path.isfile(retrained_model_path):  # 没有被保存过，需要训练
@@ -200,6 +201,19 @@ if __name__ == '__main__':
             print("{}_{}: ".format("aug_acc_imp", method_item), round(aug_imp_tmp * 100, 2))
             print("{}_{}: ".format("mix_acc_imp", method_item), round(mix_imp_tmp * 100, 2))
 
+    # ===== for the line plot fig ==========
+    # result_dict = {}
+    # result_dict['select rate'] = pre_li
+    # for method_item in select_method:
+    #     result_dict[str(method_item) + str("_ori")] = ori_acc_save[method_item]
+    #     result_dict[str(method_item) + str("_aug")] = aug_acc_save[method_item]
+    #     result_dict[str(method_item) + str("_mix")] = mix_acc_save[method_item]
+    #
+    # print(result_dict)
+    # df = pd.DataFrame(result_dict)
+    # df.to_csv("./exp_results/rq3/line_rq3_{}_{}.csv".format(args.dataset, args.model_type))
+
+    # -------final result--------
     result_dict = {}
     result_dict['select rate'] = pre_li
     for method_item in select_method:
@@ -209,4 +223,4 @@ if __name__ == '__main__':
 
     print(result_dict)
     df = pd.DataFrame(result_dict)
-    df.to_csv("./exp_results/rq3/20rq3_{}_{}.csv".format(args.dataset, args.model_type))
+    df.to_csv("./exp_results/rq3/rq3_{}_{}.csv".format(args.dataset, args.model_type))

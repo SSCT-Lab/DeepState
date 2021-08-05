@@ -58,7 +58,7 @@ def get_selection_information(file_path, model, lstm_classifier, dense_model, wr
         X, Y = process_snips_data(file_path, w2v_path)
 
     weight_state, stellar_bscov, stellar_btcov, rnntest_sc, rnntest_sc_cam, nc_cov, nc_cam = [], [], [], [], [], [], []
-    right, hscov_max_index, trend_set = [], [], []
+    right, hscov_max_index, trend_set, gini_value = [], [], [], []
     act_set = set()
     act_time_set = set()
 
@@ -71,6 +71,7 @@ def get_selection_information(file_path, model, lstm_classifier, dense_model, wr
             y_test = y
 
         classify_out_list, plus_sum, minus_sum = [], [], []
+        gini = 0
         lstm_out = model.predict(x_test)[1]
 
         # hs_cov
@@ -105,6 +106,11 @@ def get_selection_information(file_path, model, lstm_classifier, dense_model, wr
         # check the predict result the right or wrong
         check_predict_result(int(classify_out_list[-1]), int(np.argmax(y_test)), right)
 
+        # gini
+        for i in range(0, len(tmp[0])):
+            gini += np.square(tmp[0][i])
+        gini_value.append(1-gini)
+
         # Stellar Coverage
         BSCov, BTCov = get_stellar_cov(lstm_classifier, model, x, wrapper_path)
         stellar_bscov.append(BSCov)
@@ -124,7 +130,7 @@ def get_selection_information(file_path, model, lstm_classifier, dense_model, wr
     unique_index_arr, unique_index_arr_id = np.unique(hscov_max_index, return_index=True)
 
     return weight_state, unique_index_arr_id, np.array(stellar_bscov), np.array(stellar_btcov), np.array(rnntest_sc), \
-           np.array(nc_cov), np.array(nc_cam), np.array(rnntest_sc_cam), trend_set, right
+           np.array(nc_cov), np.array(nc_cam), np.array(rnntest_sc_cam), trend_set, right, gini_value
 
 
 def get_selected_data(file_path, selected_li, w2v_path):
