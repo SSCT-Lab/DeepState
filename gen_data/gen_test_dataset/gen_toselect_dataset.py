@@ -42,7 +42,7 @@ def gen_mnist():
         np.random.set_state(state)
         np.random.shuffle(y_save_data)
 
-        np.savez(("../../gen_data/mnist_toselect" + "_{}").format(times), X=x_save_data, Y=y_save_data)
+        np.savez(("../../gen_data/mnist_toselect/mnist_toselect" + "_{}").format(times), X=x_save_data, Y=y_save_data)
 
 
 def gen_snips():
@@ -111,7 +111,7 @@ def gen_fashion():
         np.random.set_state(state)
         np.random.shuffle(y_save_data)
 
-        np.savez(("../../gen_data/fashion_toselect" + "_{}").format(times), X=x_save_data, Y=y_save_data)
+        np.savez(("../../gen_data/fashion_toselect/fashion_toselect" + "_{}").format(times), X=x_save_data, Y=y_save_data)
 
 
 if __name__ == '__main__':

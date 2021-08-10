@@ -26,22 +26,22 @@ Epoch 30/30
 
 ## Preparing the data set for selection
 
-First, we need to generate the augmented data:
-
-```sh
-python3 ./gen_data/dau_mnist.py
-```
-
 For evaluating RQ1, we generate 30 different dataset for selection:
 
 ```sh
-python3 ./gen_data/gen_toselect_dataset.py -dataset "mnist"   # for RQ1 & RQ2
+# generate the augmented data for selection
+cd ../../gen_data/gen_test_dataset
+python3 dau_mnist.py
+python3 gen_toselect_dataset.py -dataset "mnist"   # for RQ1 & RQ2
 ```
 
 For evaluation RQ3, we generate the dataset for selection and retraining and the test set for evaluation:
 
 ```sh
-python3 ./gen_data/gen_toselect_retrain.py -dataset "mnist"   # for RQ3
+# generate the augmented data for selection and retraining
+cd ../gen_retrain_dataset
+python3 dau_mnist.py
+python3 gen_retrain.py -dataset "mnist"   # for RQ3
 ```
 
 If you feel that the steps to generate the augmented data are troublesome, or you just want to reproduce the results, you can download the data we generated [here](https://drive.google.com/drive/folders/1jjtwb44aX_yeeYktlyCpPUoDXeZ2mHYR?usp=sharing).
