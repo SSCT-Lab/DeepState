@@ -13,14 +13,15 @@ pip install -r requirements.txt
 ## Preparing an RNN model as the test object
 
 ```sh
-python3 ./RNNModels/mnist_demo/mnist_lstm.py
+cd RNNModels/mnist_demo
+python3 mnist_lstm.py
 ```
 
 After the training is completed, the output is as follows, and the trained model will be saved in the `./RNNModels/mnist_demo/models/mnist_lstm.h5`.
 
 ```
-Epoch 20/20
-60000/60000 [==============================] - 11s 178us/step - loss: 0.0103 - accuracy: 0.9970 - val_loss: 0.0569 - val_accuracy: 0.9866
+Epoch 30/30
+54000/54000 [==============================] - 14s 255us/step - loss: 0.0063 - accuracy: 0.9981 - val_loss: 0.0680 - val_accuracy: 0.9871
 ```
 
 ## Preparing the data set for selection

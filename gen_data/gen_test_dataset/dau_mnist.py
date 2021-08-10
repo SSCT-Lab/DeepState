@@ -68,12 +68,12 @@ class daugor(object):
         return (x_train, y_train), (x_test, y_test)
 
     # augment data
-    def dau_datasets(self, num):
+    def dau_datasets(self, num=10):
         self.init_dir()
-        self.run("train", num=num)
+        # self.run("train", num=num)
         self.run("test", num=num)
 
-    def run(self, prefix, num):
+    def run(self, prefix, num=10):
         for i in range(num):
             img_list = []
             label_list = []
@@ -81,7 +81,7 @@ class daugor(object):
             ori_label_list = []
 
             if prefix == "train":
-                data = zip(self.x_train[-12000:], self.y_train[-12000:])
+                data = zip(self.x_train, self.y_train)
             else:
                 data = zip(self.x_test, self.y_test)
             for x, y in tqdm(data):
@@ -94,16 +94,15 @@ class daugor(object):
             ys = np.array(label_list)
             xss = np.array(ori_img_list)
             yss = np.array(ori_label_list)
-            np.save((self.x_path + "_{}").format(prefix, "aug"), xs)
-            np.save((self.y_path + "_{}").format(prefix, "aug"), ys)
+            np.save((self.x_path + "_{}").format(prefix, i), xs)
+            np.save((self.y_path + "_{}").format(prefix, i), ys)
 
-            np.save((self.x_path + "_{}").format(prefix, "ori"), xss)
-            np.save((self.y_path + "_{}").format(prefix, "ori"), yss)
+            np.save((self.x_path + "_{}").format("ori_test", i), xss)
+            np.save((self.y_path + "_{}").format("ori_test", i), yss)
 
 
 if __name__ == '__main__':
-    os.makedirs("./dau", exist_ok=True)
-
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     # Initialization parameters
     params = {
         "data_name": None,
@@ -118,5 +117,5 @@ if __name__ == '__main__':
     params["width"] = 28
     params["height"] = 28
     params["channel"] = 1
-    params["base_dir"] = "./dau/{}_harder".format("mnist")
+    params["base_dir"] = "dau/{}_harder".format("mnist")
     daugor(params).dau_datasets(num=1)
