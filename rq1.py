@@ -191,7 +191,10 @@ if __name__ == '__main__':
                    'testRNNsc_cam10': sc_cam_bdr[10], 'testRNNsc_cam20': sc_cam_bdr[20], 'testRNNsc_cam50': sc_cam_bdr[50],
                    'nc_ctm10': nc_ctm_bdr[10], 'nc_ctm20': nc_ctm_bdr[20], 'nc_ctm50': nc_ctm_bdr[50],
                    'nc_cam10': nc_cam_bdr[10], 'nc_cam20': nc_cam_bdr[20], 'nc_cam50': nc_cam_bdr[50]}
-    # print(result_dict)
+
+    print(result_dict)
     df = pd.DataFrame(result_dict)
     os.makedirs("./exp_results/rq1", exist_ok=True)
     df.to_csv("./exp_results/rq1/rq1_{}_{}.csv".format(args.dataset, args.model_type))
+
+    print("Finished! The results are saved in: [./exp_results/rq1/rq1_{}_{}.csv]".format(args.dataset, args.model_type))

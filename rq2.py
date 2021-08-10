@@ -161,7 +161,10 @@ if __name__ == '__main__':
     result_dict = {'state': state_w_in, 'random': ran_in, 'RNNTestcov': RNNTestcov_in, 'Stellarbscov': Stellarbscov_in,
                    'Stellarbtcov': Stellarbtcov_in, 'testRNNsc': sc_ctm_in, 'testRNNsc_cam': sc_cam_in,
                    'nc_ctm': nc_ctm_in, 'nc_cam': nc_cam_in}
-    # print(result_dict)
+
+    print(result_dict)
     df = pd.DataFrame(result_dict)
     os.makedirs("./exp_results/rq2", exist_ok=True)
     df.to_csv("./exp_results/rq2/rq2_{}_{}.csv".format(args.dataset, args.model_type))
+
+    print("Finished! The results are saved in: [./exp_results/rq2/rq2_{}_{}.csv]".format(args.dataset, args.model_type))

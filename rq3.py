@@ -224,3 +224,5 @@ if __name__ == '__main__':
     print(result_dict)
     df = pd.DataFrame(result_dict)
     df.to_csv("./exp_results/rq3/rq3_{}_{}.csv".format(args.dataset, args.model_type))
+
+    print("Finished! The results are saved in: [./exp_results/rq3/rq3_{}_{}.csv]".format(args.dataset, args.model_type))
