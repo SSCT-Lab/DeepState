@@ -23,7 +23,7 @@ if __name__ == '__main__':
     parse = argparse.ArgumentParser("Calculate the inclusiveness for the selected dataset.")
     parse.add_argument('-dl_model', help='path of dl model', required=True)
     parse.add_argument('-model_type', required=True, choices=['lstm', 'blstm', 'gru'])
-    parse.add_argument('-dataset', required=True, choices=['mnist', 'snips', 'fashion'])
+    parse.add_argument('-dataset', required=True, choices=['mnist', 'snips', 'fashion', 'agnews'])
     args = parse.parse_args()
 
     if args.model_type == "lstm" and args.dataset == "mnist":
@@ -113,6 +113,38 @@ if __name__ == '__main__':
         file_path = "./gen_data/fashion_toselect/fashion_toselect_0.npz"
         wrapper_path = "./RNNModels/fashion_demo/output/gru/abst_model/wrapper_gru_fashion_3_10.pkl"
         total_num = 6000
+
+    elif args.model_type == "lstm" and args.dataset == "agnews":
+        time_steps = 35
+        from RNNModels.agnews_demo.agnews_lstm import AGNewsLSTMClassifier
+
+        lstm_classifier = AGNewsLSTMClassifier()
+        lstm_classifier.data_path = "./RNNModels/agnews_demo/save/standard_data.npz"
+        lstm_classifier.embedding_path = "./RNNModels/agnews_demo/save/embedding_matrix.npy"
+        model = lstm_classifier.load_hidden_state_model(args.dl_model)
+        dense_classifier = AGNewsLSTMClassifier()
+        dense_model = dense_classifier.reload_dense(args.dl_model)
+
+        w2v_path = "./RNNModels/agnews_demo/save/w2v_model"
+        file_path = "./gen_data/agnews_toselect/agnews_toselect_0.csv"
+        wrapper_path = "./RNNModels/agnews_demo/output/lstm/abst_model/wrapper_lstm_agnews_3_10.pkl"
+        total_num = 4560
+
+    elif args.model_type == "blstm" and args.dataset == "agnews":
+        time_steps = 35
+        from RNNModels.agnews_demo.agnews_blstm import AgnewsBLSTMClassifier
+
+        lstm_classifier = AgnewsBLSTMClassifier()
+        lstm_classifier.data_path = "./RNNModels/agnews_demo/save/standard_data.npz"
+        lstm_classifier.embedding_path = "./RNNModels/agnews_demo/save/embedding_matrix.npy"
+        model = lstm_classifier.load_hidden_state_model(args.dl_model)
+        dense_classifier = AgnewsBLSTMClassifier()
+        dense_model = dense_classifier.reload_dense(args.dl_model)
+
+        w2v_path = "./RNNModels/agnews_demo/save/w2v_model"
+        file_path = "./gen_data/agnews_toselect/agnews_toselect_0.csv"
+        wrapper_path = "./RNNModels/agnews_demo/output/blstm/abst_model/wrapper_blstm_agnews_3_10.pkl"
+        total_num = 4560
 
     else:
         print("The model and data set are incorrect.")

@@ -186,9 +186,49 @@ def gen_snips():
     mix_test.to_csv("../../gen_data/snips_retrain/snips_mix_test.csv")
 
 
+def gen_agnews():
+    data = pd.read_csv("../gen_test_dataset/dau/agnews_harder/agnews_toselect.csv")  # test + test_aug, 15200
+    length = int(len(data) / 2)
+    print("ori/aug length:", length)
+    ori = data[:int(len(data) / 2)]  # The front half is ori, the back half is aug
+
+    text_ori, intent_ori = [], []
+    text_aug, intent_aug = [], []
+    text_mix, intent_mix = [], []
+    ori_test = pd.DataFrame(columns=('news', 'label'))
+    aug_test = pd.DataFrame(columns=('news', 'label'))
+    mix_test = pd.DataFrame(columns=('news', 'label'))
+
+    for i in range(len(ori)):
+        text_ori.append(data.news[i])
+        text_aug.append(data.news[i + length])
+        intent_ori.append(data.label[i])
+        intent_aug.append(data.label[i + length])
+
+        text_mix.append(data.news[i])
+        text_mix.append(data.news[i + length])
+        intent_mix.append(data.label[i])
+        intent_mix.append(data.label[i + length])
+
+    for idx, (text_i, intent_i) in enumerate(zip(text_ori, intent_ori)):
+        tmp = {'news': text_i, 'label': intent_i}
+        ori_test.loc[idx] = tmp
+    for idx, (text_i, intent_i) in enumerate(zip(text_aug, intent_aug)):
+        tmp = {'news': text_i, 'label': intent_i}
+        aug_test.loc[idx] = tmp
+    for idx, (text_i, intent_i) in enumerate(zip(text_mix, intent_mix)):
+        tmp = {'news': text_i, 'label': intent_i}
+        mix_test.loc[idx] = tmp
+
+    os.makedirs("../../gen_data/agnews_retrain", exist_ok=True)
+    ori_test.to_csv("../../gen_data/agnews_retrain/agnews_ori_test.csv")
+    aug_test.to_csv("../../gen_data/agnews_retrain/agnews_aug_test.csv")
+    mix_test.to_csv("../../gen_data/agnews_retrain/agnews_mix_test.csv")
+
+
 if __name__ == '__main__':
     parse = argparse.ArgumentParser("Generate the to-be-selected dataset for retrain.")
-    parse.add_argument('-dataset', required=True, choices=['mnist', 'snips', 'fashion'])
+    parse.add_argument('-dataset', required=True, choices=['mnist', 'snips', 'fashion', 'agnews'])
     args = parse.parse_args()
 
     if args.dataset == "mnist":
@@ -199,3 +239,6 @@ if __name__ == '__main__':
 
     if args.dataset == "fashion":
         gen_fashion()
+
+    if args.dataset == "agnews":
+        gen_agnews()

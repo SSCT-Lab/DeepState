@@ -104,12 +104,39 @@ def fashion_gru_abst():
     get_abst_model(profile_save_path, abst_save_path, name_prefix, lstm_classifier, model)
 
 
+def agnews_lstm_abst():
+    from RNNModels.agnews_demo.agnews_lstm import AGNewsLSTMClassifier
+    dl_model = "./RNNModels/agnews_demo/models/agnews_lstm.h5"
+    profile_save_path = "./RNNModels/agnews_demo/output/lstm/profile_save"
+    abst_save_path = "./RNNModels/agnews_demo/output/lstm/abst_model"
+    name_prefix = "lstm_agnews"
+    lstm_classifier = AGNewsLSTMClassifier()
+    lstm_classifier.embedding_path = "./RNNModels/agnews_demo/save/embedding_matrix.npy"
+    lstm_classifier.data_path = "./RNNModels/agnews_demo/save/standard_data.npz"
+    model = lstm_classifier.load_hidden_state_model(dl_model)
+    get_abst_model(profile_save_path, abst_save_path, name_prefix, lstm_classifier, model)
+
+
+def agnews_blstm_abst():
+    from RNNModels.agnews_demo.agnews_blstm import AgnewsBLSTMClassifier
+    dl_model = "./RNNModels/agnews_demo/models/agnews_blstm.h5"
+    profile_save_path = "./RNNModels/agnews_demo/output/blstm/profile_save"
+    abst_save_path = "./RNNModels/agnews_demo/output/blstm/abst_model"
+    name_prefix = "blstm_agnews"
+    lstm_classifier = AgnewsBLSTMClassifier()
+    lstm_classifier.embedding_path = "./RNNModels/agnews_demo/save/embedding_matrix.npy"
+    lstm_classifier.data_path = "./RNNModels/agnews_demo/save/standard_data.npz"
+    model = lstm_classifier.load_hidden_state_model(dl_model)
+    get_abst_model(profile_save_path, abst_save_path, name_prefix, lstm_classifier, model)
+
+
 if __name__ == '__main__':
     parse = argparse.ArgumentParser(
         "Generate the abstract model for DeepStellar-cov.")
     parse.add_argument('-test_obj', required=True, choices=['mnist_lstm', 'mnist_blstm',
                                                             'snips_blstm', 'snips_gru',
-                                                            'fashion_lstm', 'fashion_gru'])
+                                                            'fashion_lstm', 'fashion_gru',
+                                                            'agnews_lstm', 'agnews_blstm'])
     args = parse.parse_args()
 
     if args.test_obj == "mnist_lstm":
@@ -124,3 +151,7 @@ if __name__ == '__main__':
         fashion_lstm_abst()
     if args.test_obj == "fashion_gru":
         fashion_gru_abst()
+    if args.test_obj == "agnews_lstm":
+        agnews_lstm_abst()
+    if args.test_obj == "agnews_blstm":
+        agnews_blstm_abst()

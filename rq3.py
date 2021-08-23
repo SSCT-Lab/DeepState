@@ -12,7 +12,7 @@ import keras.backend.tensorflow_backend as K
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 config = tf.compat.v1.ConfigProto()
-config.gpu_options.allow_growth = True   # Do not occupy all of the video memory, allocate on demand
+config.gpu_options.allow_growth = True   # Do not occupy all of the memory, allocate on demand
 sess = tf.compat.v1.Session(config=config)
 
 K.set_session(sess)
@@ -23,7 +23,7 @@ if __name__ == '__main__':
     parse = argparse.ArgumentParser("Calculate the inclusiveness for the selected dataset.")
     parse.add_argument('-dl_model', help='path of dl model', required=True)
     parse.add_argument('-model_type', required=True, choices=['lstm', 'blstm', 'gru'])
-    parse.add_argument('-dataset', required=True, choices=['mnist', 'snips', 'fashion'])
+    parse.add_argument('-dataset', required=True, choices=['mnist', 'snips', 'fashion', 'agnews'])
     args = parse.parse_args()
 
     if args.model_type == "lstm" and args.dataset == "mnist":
@@ -73,7 +73,7 @@ if __name__ == '__main__':
         dense_classifier = SnipsBLSTMClassifier()
         dense_model = dense_classifier.reload_dense(args.dl_model)
 
-        to_select_path = "gen_data/snips_retrain/snips_toselect2000.csv"
+        to_select_path = "./gen_data/snips_retrain/snips_toselect2000.csv"
         ori_val_path = "./gen_data/snips_retrain/snips_ori_test.csv"
         aug_val_path = "./gen_data/snips_retrain/snips_aug_test.csv"
         mix_val_path = "./gen_data/snips_retrain/snips_mix_test.csv"
@@ -93,7 +93,7 @@ if __name__ == '__main__':
         dense_classifier = SnipsGRUClassifier()
         dense_model = dense_classifier.reload_dense(args.dl_model)
 
-        to_select_path = "gen_data/snips_retrain/snips_toselect2000.csv"
+        to_select_path = "./gen_data/snips_retrain/snips_toselect2000.csv"
         ori_val_path = "./gen_data/snips_retrain/snips_ori_test.csv"
         aug_val_path = "./gen_data/snips_retrain/snips_aug_test.csv"
         mix_val_path = "./gen_data/snips_retrain/snips_mix_test.csv"
@@ -138,13 +138,53 @@ if __name__ == '__main__':
         wrapper_path = "./RNNModels/fashion_demo/output/gru/abst_model/wrapper_gru_fashion_3_10.pkl"
         total_num = 16000
 
+    elif args.model_type == "lstm" and args.dataset == "agnews":
+        time_steps = 35
+        from RNNModels.agnews_demo.agnews_lstm import AGNewsLSTMClassifier
+
+        lstm_classifier = AGNewsLSTMClassifier()
+        lstm_classifier.data_path = "./RNNModels/agnews_demo/save/standard_data.npz"
+        lstm_classifier.embedding_path = "./RNNModels/agnews_demo/save/embedding_matrix.npy"
+        model = lstm_classifier.load_hidden_state_model(args.dl_model)
+        dense_classifier = AGNewsLSTMClassifier()
+        dense_model = dense_classifier.reload_dense(args.dl_model)
+
+        to_select_path = "./gen_data/agnews_retrain/agnews_toselect2.csv"
+        ori_val_path = "./gen_data/agnews_retrain/agnews_ori_test.csv"
+        aug_val_path = "./gen_data/agnews_retrain/agnews_aug_test.csv"
+        mix_val_path = "./gen_data/agnews_retrain/agnews_mix_test.csv"
+        retrain_save_path = "./RNNModels/agnews_demo/models/lstm_selected_"
+        wrapper_path = "./RNNModels/agnews_demo/output/lstm/abst_model/wrapper_lstm_agnews_3_10.pkl"
+        w2v_path = "./RNNModels/agnews_demo/save/w2v_model"
+        total_num = 32000
+
+    elif args.model_type == "blstm" and args.dataset == "agnews":
+        time_steps = 35
+        from RNNModels.agnews_demo.agnews_blstm import AgnewsBLSTMClassifier
+
+        lstm_classifier = AgnewsBLSTMClassifier()
+        lstm_classifier.data_path = "./RNNModels/agnews_demo/save/standard_data.npz"
+        lstm_classifier.embedding_path = "./RNNModels/agnews_demo/save/embedding_matrix.npy"
+        model = lstm_classifier.load_hidden_state_model(args.dl_model)
+        dense_classifier = AgnewsBLSTMClassifier()
+        dense_model = dense_classifier.reload_dense(args.dl_model)
+
+        to_select_path = "./gen_data/agnews_retrain/agnews_toselect2.csv"
+        ori_val_path = "./gen_data/agnews_retrain/agnews_ori_test.csv"
+        aug_val_path = "./gen_data/agnews_retrain/agnews_aug_test.csv"
+        mix_val_path = "./gen_data/agnews_retrain/agnews_mix_test.csv"
+        retrain_save_path = "./RNNModels/agnews_demo/models/blstm_selected_"
+        wrapper_path = "./RNNModels/agnews_demo/output/blstm/abst_model/wrapper_blstm_agnews_3_10.pkl"
+        w2v_path = "./RNNModels/agnews_demo/save/w2v_model"
+        total_num = 32000
+
     else:
         print("The model and data set are incorrect.")
         sys.exit(1)
 
     ori_acc_save, aug_acc_save, mix_acc_save = {}, {}, {}
 
-    pre_li = [1, 4, 8, 12, 16, 20]
+    pre_li = [1, 4, 8, 12, 15, 16, 20]
     weight_state, unique_index_arr_id, stellar_bscov, stellar_btcov, \
     rnntest_sc, nc_cov, nc_cam, rnntest_sc_cam, trend_set, right = get_selection_information(
         to_select_path, model, lstm_classifier, dense_model, wrapper_path, w2v_path, time_steps)

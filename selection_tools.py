@@ -50,12 +50,51 @@ def process_snips_data(data_path, w2v_path):
     return X_pad, Y
 
 
+def process_agnews_data(data_path, w2v_path):
+    data = pd.read_csv(data_path)
+    w2v_model = Word2Vec.load(w2v_path)
+    sentences_ = list(data["news"])
+    intent_ = list(data["label"])
+    intent = [i-1 for i in intent_]
+
+    sentences = []
+    for s in sentences_:
+        clean = re.sub(r'[^ a-z A-Z 0-9]', " ", s)
+        w = word_tokenize(clean)
+        # stemming
+        sentences.append([i.lower() for i in w])
+
+    # 取得所有单词
+    vocab_list = list(w2v_model.wv.vocab.keys())
+    # 每个词语对应的索引
+    word_index = {word: index for index, word in enumerate(vocab_list)}
+
+    # 序列化
+    def get_index(sentence):
+        sequence = []
+        for word in sentence:
+            try:
+                sequence.append(word_index[word])
+            except KeyError:
+                pass
+        return sequence
+
+    X_data = list(map(get_index, sentences))
+
+    maxlen = 35  # 截长补短
+    X_pad = pad_sequences(X_data, maxlen=maxlen)
+    Y = keras.utils.to_categorical(intent, num_classes=4)
+    return X_pad, Y
+
+
 def get_selection_information(file_path, model, lstm_classifier, dense_model, wrapper_path, w2v_path, time_steps):
     if file_path.split(".")[-1] == "npz":
         with np.load(file_path, allow_pickle=True) as f:
             X, Y = f['X'], f['Y']
-    elif file_path.split(".")[-1] == "csv":
+    if file_path.split(".")[-1] == "csv" and "snips" in file_path.split(".")[-2]:
         X, Y = process_snips_data(file_path, w2v_path)
+    elif file_path.split(".")[-1] == "csv" and "agnews" in file_path.split(".")[-2]:
+        X, Y = process_agnews_data(file_path, w2v_path)
 
     weight_state, stellar_bscov, stellar_btcov, rnntest_sc, rnntest_sc_cam, nc_cov, nc_cam = [], [], [], [], [], [], []
     right, hscov_max_index, trend_set = [], [], []
@@ -137,11 +176,18 @@ def get_selected_data(file_path, selected_li, w2v_path):
             X_selected.append(X[idx][0])
             Y_selected.append(Y[idx])
 
-    elif file_path.split(".")[-1] == "csv":
+    elif file_path.split(".")[-1] == "csv" and "snips" in file_path.split(".")[-2]:
         X, Y = process_snips_data(file_path, w2v_path)
         for idx in selected_id:
             X_selected.append(np.array(X[idx]))
             Y_selected.append(Y[idx])
+
+    elif file_path.split(".")[-1] == "csv" and "agnews" in file_path.split(".")[-2]:
+        X, Y = process_agnews_data(file_path, w2v_path)
+        for idx in selected_id:
+            X_selected.append(np.array(X[idx]))
+            Y_selected.append(Y[idx])
+
     X_selected_array = np.array(X_selected)
     Y_selected_array = np.array(Y_selected)
     return X_selected_array, Y_selected_array
@@ -156,8 +202,14 @@ def get_val_data(file_path, w2v_path):
             X_val.append(x[0])
         return np.array(X_val), Y
 
-    elif file_path.split(".")[-1] == "csv":
+    elif file_path.split(".")[-1] == "csv" and "snips" in file_path.split(".")[-2]:
         X, Y = process_snips_data(file_path, w2v_path)
+        for x in X:
+            X_val.append(x)
+        return np.array(X_val), Y
+
+    elif file_path.split(".")[-1] == "csv" and "agnews" in file_path.split(".")[-2]:
+        X, Y = process_agnews_data(file_path, w2v_path)
         for x in X:
             X_val.append(x)
         return np.array(X_val), Y

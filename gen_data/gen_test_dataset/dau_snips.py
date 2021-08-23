@@ -69,7 +69,7 @@ if __name__ == '__main__':
     model_dir = "./nlp_model/"
     os.makedirs("./dau/snips_harder", exist_ok=True)
     data = pd.read_csv("../new_intent.csv")
-    to_be_aug_data = data[:500]
+    to_be_aug_data = data[9990:]
     # selected_data = to_be_aug_data.sample(n=1000)
 
     selected_data = to_be_aug_data.reset_index(drop=True)

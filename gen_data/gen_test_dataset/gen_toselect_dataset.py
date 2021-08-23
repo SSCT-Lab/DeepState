@@ -114,9 +114,39 @@ def gen_fashion():
         np.savez(("../../gen_data/fashion_toselect/fashion_toselect" + "_{}").format(times), X=x_save_data, Y=y_save_data)
 
 
+def gen_agnews():
+    data = pd.read_csv("./dau/agnews_harder/agnews_toselect.csv")
+    length = int(len(data) / 2)
+    print("ori/aug legth:", length)
+    ori = data[:int(len(data) / 2)]
+    aug = data[int(len(data) / 2):]
+    li = np.arange(len(ori))
+
+    os.makedirs("../../gen_data/agnews_toselect", exist_ok=True)
+
+    for times in range(30):
+        text, intent = [], []
+        to_select = pd.DataFrame(columns=('news', 'label'))
+        select_id = np.random.choice(a=li, size=2280, replace=False)
+        print(select_id)
+
+        for i in select_id:
+            text.append(data.news[i])
+            text.append(data.news[i + length])
+            intent.append(data.label[i])
+            intent.append(data.label[i + length])
+
+        for idx, (text_i, intent_i) in enumerate(zip(text, intent)):
+            tmp = {'news': text_i, 'label': intent_i}
+            to_select.loc[idx] = tmp
+
+        to_select.sample(frac=1)  # shuffle
+        to_select.to_csv(("../../gen_data/agnews_toselect/agnews_toselect" + "_{}" + ".csv").format(times))
+
+
 if __name__ == '__main__':
     parse = argparse.ArgumentParser("Generate the dataset for selection.")
-    parse.add_argument('-dataset', required=True, choices=['mnist', 'snips', 'fashion'])
+    parse.add_argument('-dataset', required=True, choices=['mnist', 'snips', 'fashion', 'agnews'])
     args = parse.parse_args()
 
     if args.dataset == "mnist":
@@ -127,3 +157,6 @@ if __name__ == '__main__':
 
     if args.dataset == "fashion":
         gen_fashion()
+
+    if args.dataset == "agnews":
+        gen_agnews()
