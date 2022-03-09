@@ -11,6 +11,7 @@ from keras.layers import Dense, LSTM, Bidirectional, Embedding, Dropout, Input, 
 from keras.models import Model
 from keras.callbacks import ModelCheckpoint
 import keras
+import argparse
 intent_dic = {"PlayMusic": 0, "AddToPlaylist": 1, "RateBook": 2, "SearchScreeningEvent": 3,
               "BookRestaurant": 4, "GetWeather": 5, "SearchCreativeWork": 6}
 
@@ -103,6 +104,7 @@ class SnipsBLSTMClassifier:
         self.Y_test = None
         self.n_units = 64  # hidden LSTM units
         self.n_epochs = 10
+        self.epochs = 20
         self.batch_size = 32  # Size of each batch
         self.n_classes = 7
 
@@ -133,10 +135,19 @@ class SnipsBLSTMClassifier:
         self.create_model()
         checkpoint = ModelCheckpoint(filepath=os.path.join(save_path, "snips_blstm.h5"),
                                      monitor='val_acc', save_best_only=True, mode='auto')
-        self.model.fit(self.X_train, self.Y_train, epochs=self.n_epochs, batch_size=self.batch_size,
+        self.model.fit(self.X_train, self.Y_train, epochs=self.epochs, batch_size=self.batch_size,
                        validation_data=(self.X_test, self.Y_test), shuffle=False, callbacks=[checkpoint])
         os.makedirs(save_path, exist_ok=True)
         self.model.save(os.path.join(save_path, "snips_blstm.h5"))
+
+    def train_model_(self, save_path):
+        self.create_model()
+        checkpoint = ModelCheckpoint(filepath=os.path.join(save_path, "snips_blstm_ori.h5"),
+                                     monitor='val_acc', save_best_only=True, mode='auto')
+        self.model.fit(self.X_train, self.Y_train, epochs=self.n_epochs, batch_size=self.batch_size,
+                       validation_data=(self.X_test, self.Y_test), shuffle=False, callbacks=[checkpoint])
+        os.makedirs(save_path, exist_ok=True)
+        self.model.save(os.path.join(save_path, "snips_blstm_ori.h5"))
 
         # print(self.model.evaluate(self.X_test, self.Y_test))
 
@@ -209,7 +220,22 @@ class SnipsBLSTMClassifier:
         return output[1]
 
 
-if __name__ == '__main__':
+def train_model():
+    # step 1. preprocess data
+    data_path = "./data/new_intent.csv"
+    save_path = "./save"
+    os.makedirs(save_path, exist_ok=True)
+    process_data(data_path, save_path)
+
+    # step 2. create and train the model
+    classifier = SnipsBLSTMClassifier()
+    classifier.embedding_path = "./save/embedding_matrix.npy"
+    classifier.data_path = "./save/standard_data.npz"
+    classifier.get_information()
+    classifier.train_model("./models")
+
+
+def train_model_ori():
     # step 1. preprocess data
     # data_path = "./data/new_intent.csv"
     # save_path = "./save"
@@ -221,5 +247,15 @@ if __name__ == '__main__':
     classifier.embedding_path = "./save/embedding_matrix.npy"
     classifier.data_path = "./save/standard_data.npz"
     classifier.get_information()
-    classifier.train_model("./models")
+    classifier.train_model_("./models")
 
+
+if __name__ == "__main__":
+    parse = argparse.ArgumentParser("Train the BLSTM model on Snips dataset.")
+    parse.add_argument('-type', required=True, choices=['train', 'retrain'])
+    args = parse.parse_args()
+
+    if args.type == "train":
+        train_model()
+    elif args.type == "retrain":
+        train_model_ori()

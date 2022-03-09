@@ -11,6 +11,8 @@ from keras.layers import Dense, LSTM, Bidirectional, Embedding, Dropout, Input, 
 from keras.models import Model
 from keras.callbacks import ModelCheckpoint
 import keras
+import argparse
+
 
 def load_sentence(filename):
     df = pd.read_csv(filename)
@@ -95,6 +97,7 @@ class AgnewsBLSTMClassifier:
         self.Y_test = None
         self.n_units = 128  # hidden LSTM units
         self.n_epochs = 10
+        self.epochs = 20
         self.batch_size = 256  # Size of each batch
         self.n_classes = 4
 
@@ -125,12 +128,19 @@ class AgnewsBLSTMClassifier:
         self.create_model()
         checkpoint = ModelCheckpoint(filepath=os.path.join(save_path, "agnews_blstm.h5"),
                                      monitor='val_acc', save_best_only=True, mode='auto')
-        self.model.fit(self.X_train, self.Y_train, epochs=self.n_epochs, batch_size=self.batch_size,
+        self.model.fit(self.X_train, self.Y_train, epochs=self.epochs, batch_size=self.batch_size,
                        validation_data=(self.X_test, self.Y_test), shuffle=False, callbacks=[checkpoint])
         os.makedirs(save_path, exist_ok=True)
         self.model.save(os.path.join(save_path, "agnews_blstm.h5"))
 
-        # print(self.model.evaluate(self.X_test, self.Y_test))
+    def train_model_(self, save_path):
+        self.create_model()
+        checkpoint = ModelCheckpoint(filepath=os.path.join(save_path, "agnews_blstm_ori.h5"),
+                                     monitor='val_acc', save_best_only=True, mode='auto')
+        self.model.fit(self.X_train, self.Y_train, epochs=self.n_epochs, batch_size=self.batch_size,
+                       validation_data=(self.X_test, self.Y_test), shuffle=False, callbacks=[checkpoint])
+        os.makedirs(save_path, exist_ok=True)
+        self.model.save(os.path.join(save_path, "agnews_blstm_ori.h5"))
 
     def retrain(self, X_selected, Y_selected, X_val, Y_val, save_path):
         self.create_model()
@@ -201,8 +211,23 @@ class AgnewsBLSTMClassifier:
         return output[1]
 
 
-if __name__ == '__main__':
+def train_model():
     # step 1. preprocess data
+    data_path = "./data/new_intent.csv"
+    save_path = "./save"
+    os.makedirs(save_path, exist_ok=True)
+    process_data(data_path, save_path)
+
+    # step 2. create and train the model
+    classifier = AgnewsBLSTMClassifier()
+    classifier.embedding_path = "./save/embedding_matrix.npy"
+    classifier.data_path = "./save/standard_data.npz"
+    classifier.get_information()
+    classifier.train_model("./models")
+
+
+def train_model_ori():
+    # # step 1. preprocess data
     # data_path = "./data/new_intent.csv"
     # save_path = "./save"
     # os.makedirs(save_path, exist_ok=True)
@@ -213,5 +238,15 @@ if __name__ == '__main__':
     classifier.embedding_path = "./save/embedding_matrix.npy"
     classifier.data_path = "./save/standard_data.npz"
     classifier.get_information()
-    classifier.train_model("./models")
+    classifier.train_model_("./models")
 
+
+if __name__ == "__main__":
+    parse = argparse.ArgumentParser("Train the BLSTM model on Agnews dataset.")
+    parse.add_argument('-type', required=True, choices=['train', 'retrain'])
+    args = parse.parse_args()
+
+    if args.type == "train":
+        train_model()
+    elif args.type == "retrain":
+        train_model_ori()

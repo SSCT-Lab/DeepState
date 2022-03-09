@@ -14,14 +14,14 @@ pip install -r requirements.txt
 
 ```sh
 cd RNNModels/mnist_demo
-python3 mnist_lstm.py
+python3 mnist_lstm.py -type "train"
 ```
 
 After the training is completed, the output is as follows, and the trained model will be saved in the `./RNNModels/mnist_demo/models/mnist_lstm.h5`.
 
 ```
-Epoch 30/30
-54000/54000 [==============================] - 14s 255us/step - loss: 0.0063 - accuracy: 0.9981 - val_loss: 0.0680 - val_accuracy: 0.9871
+Epoch 20/20
+60000/60000 [==============================] - 9s 158us/step - loss: 0.0100 - accuracy: 0.9969 - val_loss: 0.0575 - val_accuracy: 0.9872
 ```
 
 ## Preparing the data set for selection
@@ -73,8 +73,17 @@ The results will be saved in `./exp_results/rq2` .
 
 ## RQ3
 
+First, we need to prepare the model before retraining:
+
 ```sh
-python3 rq3.py -dl_model "./RNNModels/mnist_demo/models/mnist_lstm.h5" -model_type "lstm" -dataset "mnist"
+cd RNNModels/mnist_demo
+python3 mnist_lstm.py -type "retrain"
+```
+
+Then, we can evaluate the RQ3:
+
+```sh
+python3 rq3.py -dl_model "./RNNModels/mnist_demo/models/mnist_lstm_ori.h5" -model_type "lstm" -dataset "mnist"
 ```
 
 The results will be saved in `./exp_results/rq3` .

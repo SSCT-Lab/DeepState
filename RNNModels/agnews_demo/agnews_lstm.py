@@ -11,6 +11,7 @@ from keras.layers import Dense, LSTM, Embedding, Dropout, Input, Lambda
 from keras.models import Model
 from keras.callbacks import ModelCheckpoint
 import keras
+import argparse
 
 
 def load_sentence(filename):
@@ -96,6 +97,7 @@ class AGNewsLSTMClassifier:
         self.Y_test = None
         self.n_units = 128  # hidden LSTM units
         self.n_epochs = 10
+        self.epochs = 20
         self.batch_size = 256  # Size of each batch
         self.n_classes = 4
 
@@ -130,7 +132,16 @@ class AGNewsLSTMClassifier:
                        validation_data=(self.X_test, self.Y_test), callbacks=[checkpoint])
         os.makedirs(save_path, exist_ok=True)
         self.model.save(os.path.join(save_path, "agnews_lstm.h5"))
+        print(self.model.evaluate(self.X_test, self.Y_test))
 
+    def train_model_(self, save_path):
+        self.create_model()
+        checkpoint = ModelCheckpoint(filepath=os.path.join(save_path, "agnews_lstm_ori.h5"),
+                                     monitor='val_acc', verbose=1, save_best_only=True, mode='auto')
+        self.model.fit(self.X_train, self.Y_train, epochs=self.n_epochs, batch_size=self.batch_size,
+                       validation_data=(self.X_test, self.Y_test), callbacks=[checkpoint])
+        os.makedirs(save_path, exist_ok=True)
+        self.model.save(os.path.join(save_path, "agnews_lstm_ori.h5"))
         print(self.model.evaluate(self.X_test, self.Y_test))
 
     def retrain(self, X_selected, Y_selected, X_val, Y_val, save_path):
@@ -201,7 +212,7 @@ class AGNewsLSTMClassifier:
         return output[1]
 
 
-if __name__ == '__main__':
+def train_model():
     # step 1. preprocess data
     data_path = "./data/agnews.csv"
     save_path = "./save"
@@ -214,3 +225,27 @@ if __name__ == '__main__':
     classifier.get_information()
     classifier.train_model("./models")
 
+
+def train_model_ori():
+    # step 1. preprocess data
+    data_path = "./data/agnews.csv"
+    save_path = "./save"
+    process_data(data_path, save_path)
+
+    # step 2. create and train the model
+    classifier = AGNewsLSTMClassifier()
+    classifier.embedding_path = "./save/embedding_matrix.npy"
+    classifier.data_path = "./save/standard_data.npz"
+    classifier.get_information()
+    classifier.train_model_("./models")
+
+
+if __name__ == "__main__":
+    parse = argparse.ArgumentParser("Train the LSTM model on Agnews dataset.")
+    parse.add_argument('-type', required=True, choices=['train', 'retrain'])
+    args = parse.parse_args()
+
+    if args.type == "train":
+        train_model()
+    elif args.type == "retrain":
+        train_model_ori()

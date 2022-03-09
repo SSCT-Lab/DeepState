@@ -8,6 +8,7 @@ from keras.models import Model
 import numpy as np
 import os
 from keras.callbacks import ModelCheckpoint
+import argparse
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 
@@ -20,6 +21,7 @@ class MnistBLSTMClassifier:
         self.n_classes = 10  # mnist classes/labels (0-9)
         self.batch_size = 128  # Size of each batch
         self.n_epochs = 30
+        self.epochs = 20
 
     def input_preprocess(self, data):
         data = data.reshape(data.shape[0], self.n_inputs, self.n_inputs)
@@ -43,19 +45,37 @@ class MnistBLSTMClassifier:
         self.create_model()
         (x_train, y_train), (x_test, y_test) = mnist.load_data()
 
+        x_train = self.input_preprocess(x_train)
+        x_test = self.input_preprocess(x_test)
+
+        y_test = keras.utils.to_categorical(y_test, num_classes=10)
+        y_train = keras.utils.to_categorical(y_train, num_classes=10)
+
+        checkpoint = ModelCheckpoint(filepath=os.path.join(save_path, "mnist_blstm.h5"), monitor='val_acc', mode='auto',
+                                     save_best_only='True')
+        self.model.fit(x_train, y_train, validation_data=(x_test, y_test),
+                       batch_size=self.batch_size, epochs=self.epochs, shuffle=False, callbacks=[checkpoint])
+
+        os.makedirs(save_path, exist_ok=True)
+        self.model.save(os.path.join(save_path, "mnist_blstm.h5"))
+
+    def train_(self, save_path):
+        self.create_model()
+        (x_train, y_train), (x_test, y_test) = mnist.load_data()
+
         x_train = self.input_preprocess(x_train[:-6000])
         x_test = self.input_preprocess(x_test)
 
         y_test = keras.utils.to_categorical(y_test, num_classes=10)
         y_train = keras.utils.to_categorical(y_train[:-6000], num_classes=10)
 
-        checkpoint = ModelCheckpoint(filepath=os.path.join(save_path, "mnist_blstm.h5"), monitor='val_acc', mode='auto',
+        checkpoint = ModelCheckpoint(filepath=os.path.join(save_path, "mnist_blstm_ori.h5"), monitor='val_acc', mode='auto',
                                      save_best_only='True')
         self.model.fit(x_train, y_train, validation_data=(x_test, y_test),
                        batch_size=self.batch_size, epochs=self.n_epochs, shuffle=False, callbacks=[checkpoint])
 
         os.makedirs(save_path, exist_ok=True)
-        self.model.save(os.path.join(save_path, "mnist_blstm.h5"))
+        self.model.save(os.path.join(save_path, "mnist_blstm_ori.h5"))
 
     def retrain(self, X_selected, Y_selected, X_val, Y_val, save_path):
         self.create_model()
@@ -128,14 +148,28 @@ class MnistBLSTMClassifier:
         return output[1]
 
 
-if __name__ == "__main__":
-    (x_train, y_train), (x_test, y_test) = mnist.load_data()
-
+def train_model():
     save_path = "./models"
-
     lstm_classifier = MnistBLSTMClassifier()
-    x_test = lstm_classifier.input_preprocess(x_test)
     # train an rnn model
     lstm_classifier.create_model()
     lstm_classifier.train(save_path)
 
+
+def train_model_ori():
+    save_path = "./models"
+    lstm_classifier = MnistBLSTMClassifier()
+    # train an rnn model
+    lstm_classifier.create_model()
+    lstm_classifier.train_(save_path)
+
+
+if __name__ == "__main__":
+    parse = argparse.ArgumentParser("Train the BLSTM model on MNIST dataset.")
+    parse.add_argument('-type', required=True, choices=['train', 'retrain'])
+    args = parse.parse_args()
+
+    if args.type == "train":
+        train_model()
+    elif args.type == "retrain":
+        train_model_ori()

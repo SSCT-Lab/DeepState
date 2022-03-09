@@ -11,6 +11,7 @@ from keras.layers import Dense, GRU, Embedding, Dropout, Input, Lambda
 from keras.models import Model
 from keras.callbacks import ModelCheckpoint
 import keras
+import argparse
 intent_dic = {"PlayMusic": 0, "AddToPlaylist": 1, "RateBook": 2, "SearchScreeningEvent": 3,
               "BookRestaurant": 4, "GetWeather": 5, "SearchCreativeWork": 6}
 
@@ -137,7 +138,16 @@ class SnipsGRUClassifier:
                        validation_data=(self.X_test, self.Y_test), callbacks=[checkpoint])
         os.makedirs(save_path, exist_ok=True)
         self.model.save(os.path.join(save_path, "snips_gru.h5"))
+        print(self.model.evaluate(self.X_test, self.Y_test))
 
+    def train_model_(self, save_path):
+        self.create_model()
+        checkpoint = ModelCheckpoint(filepath=os.path.join(save_path, "snips_gru_ori.h5"),
+                                     monitor='val_acc', verbose=1, save_best_only=True, mode='auto')
+        self.model.fit(self.X_train, self.Y_train, epochs=self.n_epochs, batch_size=self.batch_size,
+                       validation_data=(self.X_test, self.Y_test), callbacks=[checkpoint])
+        os.makedirs(save_path, exist_ok=True)
+        self.model.save(os.path.join(save_path, "snips_gru_ori.h5"))
         print(self.model.evaluate(self.X_test, self.Y_test))
 
     def retrain(self, X_selected, Y_selected, X_val, Y_val, save_path):
@@ -208,8 +218,22 @@ class SnipsGRUClassifier:
         return output[1]
 
 
-if __name__ == '__main__':
+def train_model():
     # step 1. preprocess data
+    data_path = "./data/new_intent.csv"
+    save_path = "./save"
+    process_data(data_path, save_path)
+
+    # step 2. create and train the model
+    classifier = SnipsGRUClassifier()
+    classifier.embedding_path = "./save/embedding_matrix.npy"
+    classifier.data_path = "./save/standard_data.npz"
+    classifier.get_information()
+    classifier.train_model("./models")
+
+
+def train_model_ori():
+    # # step 1. preprocess data
     # data_path = "./data/new_intent.csv"
     # save_path = "./save"
     # process_data(data_path, save_path)
@@ -219,5 +243,15 @@ if __name__ == '__main__':
     classifier.embedding_path = "./save/embedding_matrix.npy"
     classifier.data_path = "./save/standard_data.npz"
     classifier.get_information()
-    classifier.train_model("./models")
+    classifier.train_model_("./models")
 
+
+if __name__ == "__main__":
+    parse = argparse.ArgumentParser("Train the GRU model on Snips dataset.")
+    parse.add_argument('-type', required=True, choices=['train', 'retrain'])
+    args = parse.parse_args()
+
+    if args.type == "train":
+        train_model()
+    elif args.type == "retrain":
+        train_model_ori()
