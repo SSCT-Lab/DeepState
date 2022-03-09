@@ -45,11 +45,11 @@ class MnistBLSTMClassifier:
         self.create_model()
         (x_train, y_train), (x_test, y_test) = mnist.load_data()
 
-        x_train = self.input_preprocess(x_train)
+        x_train = self.input_preprocess(x_train[:-6000])
         x_test = self.input_preprocess(x_test)
 
         y_test = keras.utils.to_categorical(y_test, num_classes=10)
-        y_train = keras.utils.to_categorical(y_train, num_classes=10)
+        y_train = keras.utils.to_categorical(y_train[:-6000], num_classes=10)
 
         checkpoint = ModelCheckpoint(filepath=os.path.join(save_path, "mnist_blstm.h5"), monitor='val_acc', mode='auto',
                                      save_best_only='True')
