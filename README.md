@@ -21,7 +21,7 @@ After the training is completed, the output is as follows, and the trained model
 
 ```
 Epoch 20/20
-60000/60000 [==============================] - 9s 158us/step - loss: 0.0100 - accuracy: 0.9969 - val_loss: 0.0575 - val_accuracy: 0.9872
+54000/54000 [==============================] - 10s 188us/step - loss: 0.0112 - accuracy: 0.9963 - val_loss: 0.0548 - val_accuracy: 0.9878
 ```
 
 ## Preparing the data set for selection
